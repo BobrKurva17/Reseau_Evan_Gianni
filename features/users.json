@@ -1,0 +1,8 @@
+[
+    {
+        "username": "AdminG",
+        "password": "$2b$12$6L5fodH1BhnFL3ye3qVHuONhy3N0y6uUkkmFGRu2CFNGNfKyWbKB6",
+        "role": "superadmin",
+        "code_secret": "$2b$12$G5aGcsV5n5cvy2DQMLpuu.QI/Q63WEsTpY3YjYg64MthvVF0ugXIC"
+    }
+]
