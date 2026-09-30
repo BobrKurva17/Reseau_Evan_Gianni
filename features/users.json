@@ -1,8 +1,8 @@
 [
     {
         "username": "AdminG",
-        "password": "$2b$12$6L5fodH1BhnFL3ye3qVHuONhy3N0y6uUkkmFGRu2CFNGNfKyWbKB6",
+        "password": "$2b$12$qd1ZQHQeR73f/rqwjI8fj.E003K9jeyiNTNj1BoonqMKOilhncVcG",
         "role": "superadmin",
-        "code_secret": "$2b$12$G5aGcsV5n5cvy2DQMLpuu.QI/Q63WEsTpY3YjYg64MthvVF0ugXIC"
+        "code_secret": "$2b$12$/LKiGAQweolDjq3qpDsg1u1owTulPOYRgli7.Dx/bn/Kj0GX9Bx6W"
     }
 ]
