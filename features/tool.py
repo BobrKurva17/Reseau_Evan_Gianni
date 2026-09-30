@@ -287,7 +287,7 @@ def calculerReseauClassfull():
     else:
         print("L'adresse de sous-réseau est identique à l'adresse réseau.")
 
-      
+
 def compareNetwork():
     print("\n────────────────── COMPARAISON DE RÉSEAUX ──────────────────")
     machines = [
@@ -320,36 +320,66 @@ def compareNetwork():
         i += 1
 
     reseaux_calculés = []
+
+    #Nouveau Calcul du réseau 
+    reseauMachineBinaire=[]        #tableau contenant le réseau des 2 machines  (binaire)
+    masqueMachineBinaire=[]        #tableau contenant le masque des 2 machines  (binaire)
+    machineBinaire=[]              #tableau contenant l'ip des 2 machines       (binaire)
     
     for mach in machines:
 
         ip_bits = "".join(f"{int(s):08b}" for s in mach["ip"])
-        
+        machineBinaire.append(ip_bits)
+
         bits_masque = "1" * mach["cidr"] + "0" * (32 - mach["cidr"])
-        
+        masqueMachineBinaire.append(bits_masque)
+
         net_bits = "".join("1" if ip_bits[j] == "1" and bits_masque[j] == "1" else "0" for j in range(32))
-        
+        reseauMachineBinaire.append(net_bits)
+
         octets_binaires = [net_bits[j:j+8] for j in range(0, 32, 8)]
         
         reseau_decimal = ".".join(str(int(octet, 2)) for octet in octets_binaires)
         
         reseaux_calculés.append(reseau_decimal)
+        
+    for mach in machines:
+     
+        ##Nouveau calcul 
+        vu_par_M1 = "".join(
+        "1" if machineBinaire[1][j] == "1" and masqueMachineBinaire[0][j] == "1" else "0"
+        for j in range(32)
+        )
 
-    memeReseau = reseaux_calculés[0] == reseaux_calculés[1]
+        # M2 regarde M1 avec son propre masque
+        vu_par_M2 = "".join(
+            "1" if machineBinaire[0][j] == "1" and masqueMachineBinaire[1][j] == "1" else "0"
+            for j in range(32)
+        )
+
+
+    m1_consideration = vu_par_M1 == reseauMachineBinaire[0]
+    m2_consideration = vu_par_M2 == reseauMachineBinaire[1]     
+    #comparaison ip machine 2 avec masque machine 1 
+   
+    #comparaison ip machine 1 avec masque machine 2 
+  
 
     print("\n───────── RÉSULTAT DU CALCUL RÉSEAU ─────────")
     print(f"Réseau Machine 1 : {reseaux_calculés[0]}/{machines[0]['cidr']}")
     print(f"Réseau Machine 2 : {reseaux_calculés[1]}/{machines[1]['cidr']}")
     
     print("\n───────── RÉSULTAT BILATÉRAL ─────────")
-    if memeReseau:
-        print("La Machine 1 considère que la Machine 2 est dans son réseau : Oui")
-        print("La Machine 2 considère que la Machine 1 est dans son réseau : Oui")
-        print("\n──> Conclusion : Les deux machines peuvent communiquer directement.")
-    else:
-        print("La Machine 1 considère que la Machine 2 est dans son réseau : Non")
-        print("La Machine 2 considère que la Machine 1 est dans son réseau : Non")
-        print("\n──> Conclusion : Les deux machines sont sur des réseaux différents.")            
+    if m1_consideration and m2_consideration:
+        print(f"les deux machines se considèrent dans le même réseau")
+    elif m1_consideration and not m2_consideration: 
+        print(f"la machine 1 se considère dans le même réseau que la machine 2  mais pas inversément")  
+    elif not m1_consideration and m2_consideration : 
+        print(f"la machine 2 se considère dans le même réseau que la machine 1 mais pas inversément")
+    else : 
+        print(f"les deux machines sont sur des réseau différents !")
+
+              
 
 
 def cleanScreen():
