@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 
 userInputIP = {}
 historicIP = []
@@ -9,18 +10,52 @@ index = 0
 # User method
 # ==========================================================================
 
+#Modifié
 def printTable():
+    matSR = []
+
     print("\nCIDR | BINAIRE                              | DECIMAL")
     print("-" * 65)
 
-    for cidr in range(8, 31):
+    for cidr in range(8, 31): 
+        cidrAffiche = "/"+str(cidr)
         bits = "1" * cidr + "0" * (32 - cidr)
         binaire = ".".join([bits[i:i+8] for i in range(0, 32, 8)])
 
         octets = [bits[i:i+8] for i in range(0, 32, 8)]
         decimal = ".".join(str(int(octet, 2)) for octet in octets)
+        ligne = [cidrAffiche,binaire,decimal]
+        matSR.append(ligne)
 
-        print(f"/{cidr:<2}  | {binaire:<36} | {decimal}")
+    for l in matSR:
+        print(f"{l[0]} | {l[1]} | {l[2]}")
+
+    choix=int(input("Souhaitez-vous exporter le tableau en fichier Excel ? \n1. OUI \n2. NON"))
+    while(choix < 1 or choix > 2):
+        choix=int(input("Souhaitez-vous exporter le tableau en fichier Excel ? \n1. OUI \n2. NON"))
+
+    if(choix == 1):
+        exporterTableau(matSR)
+
+#Fonction ajouté
+def exporterTableau(tableauSR):
+    chemin = str(input("Insérez le chemin absolue de votre dossier : "))
+    while chemin == "":
+        print("Chemin vide")
+        chemin = str(input("Insérez le chemin absolue de votre dossier : "))
+
+    if not chemin.endswith("\\"):
+        chemin += "\\"
+
+    #Transformation du tableau créer en data
+    df = pd.DataFrame(tableauSR, columns=["CIDR","Masque en Binaire","Masque en décimal"])#Ajoute un titre en plus pour les colonnes
+    with pd.ExcelWriter(chemin+'TableauMasques.xlsx', engine="xlsxwriter") as fichier:
+        df.to_excel(fichier, sheet_name="Matrice des sous réseaux", index=False)#Exporter en fichier excel
+
+    feuille = fichier.sheets["Matrice des sous réseaux"]
+    feuille.set_column("A:C", 24)
+
+    print("Le fichier a été généré avec succès !")
 
 
 def selectOrInputIP():
