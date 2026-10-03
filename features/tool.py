@@ -381,12 +381,14 @@ def compareNetwork():
     for mach in machines:
      
         ##Nouveau calcul 
+        ##appliquer le masque de machine 1 à la machine 2 
         vu_par_M1 = "".join(
         "1" if machineBinaire[1][j] == "1" and masqueMachineBinaire[0][j] == "1" else "0"
         for j in range(32)
         )
 
         # M2 regarde M1 avec son propre masque
+        # appliquer le masque de la machine 2 à la machine 1 
         vu_par_M2 = "".join(
             "1" if machineBinaire[0][j] == "1" and masqueMachineBinaire[1][j] == "1" else "0"
             for j in range(32)
@@ -414,7 +416,116 @@ def compareNetwork():
     else : 
         print(f"les deux machines sont sur des réseau différents !")
 
-              
+#Nouveau découpe réseau sur base du nombre de sous-réseaux demandés 
+def decoupe_reseau_par_nombre_sr(reseau,masque,nbr_sr):
+    #fonction valide mais VALIDATION DU RESEAU A IMPLEMENTER 
+    #vérifier la validité du reseau 
+    reseau=validIPV2(reseau)
+    # vérifier la validité du masque en classless 
+    if(masque<8 or masque>30):
+        print(" masque en classless invalide")
+        return
+    #vérifier la validité du nombre de sr 
+    if(nbr_sr<=0):
+        print("le nombre de sous-réseau est invalide !")
+        return 
+    #nombre de bits réservé pour les machines 
+    nbr_bits_hote_min=2
+    # exemple avec /24 alors il me reste 8 bits pour les hôtes 
+    nbr_bits_machines= 32-masque 
+    nbr_bits_empruntes = 0
+    while True:
+        if nbr_bits_hote_min > nbr_bits_machines-nbr_bits_empruntes:
+            print("il n'y a pas assez de bits hôtes disponible pour ce nombre de SR. ")
+            return 
+        if(nbr_sr <= (2**nbr_bits_empruntes)):
+            print("il y a donc ",nbr_bits_empruntes," empruntés aux bits hôtes")
+            break
+        
+        nbr_bits_empruntes= nbr_bits_empruntes + 1
+        ##nbr de bits empruntés jusqu'à 
+    nouveau_masque = masque + nbr_bits_empruntes
+
+    if nouveau_masque <= 16:
+        octet_travaille = 1
+        octet_report = 0
+        nbr_bits_dans_octet = nouveau_masque - 8
+    elif nouveau_masque <= 24:
+        octet_travaille = 2
+        octet_report = 1
+        nbr_bits_dans_octet = nouveau_masque - 16
+    else:
+        octet_travaille = 3
+        octet_report = 2
+        nbr_bits_dans_octet = nouveau_masque - 24
+
+    # conversion du réseau en entier ['192','168','1','0'] en [192,168,1,0]
+    for i in range(len(reseau)):
+        reseau[i] = int(reseau[i])
+
+    matrice_sr = []             #adresse du SR
+    matrice_sr_broadcast=[]     #adresse du broadcast 
+    matrice_sr_premiere_ip=[]   #adresse de la première ip dans le SR
+    matrice_sr_derniere_ip=[]   #adresse de la dernière ip dans le SR
+
+    pas = 2**(8 - nbr_bits_dans_octet)  #calcul du pas 
+    print("Num SR   adresse reseau      pas   broadcast          premiere IP             derniere IP")
+    for i in range(nbr_sr):
+
+        matrice_sr.append( reseau.copy())# le .copy me permet de garder une référence unique de chaque réseau 
+        matrice_sr_broadcast.append(reseau.copy())
+        # on récupère la valeur du dernier qu'on a ajouté dans la liste matrice_sr_broadcast 
+        #le broadcast est égal à l'ip du réseau suivant -1 
+        matrice_sr_broadcast[i][octet_travaille]+=(pas-1)
+
+        matrice_sr_premiere_ip.append(reseau.copy())
+        matrice_sr_premiere_ip[i][octet_travaille]+=1
+
+        matrice_sr_derniere_ip.append(reseau.copy())
+        matrice_sr_derniere_ip[i][octet_travaille]+=(pas-2)
+        
+        if reseau[octet_travaille] + pas <= 255:
+            reseau[octet_travaille] += pas
+        else:
+            if (reseau[octet_report] + 1 )<=255:
+                reseau[octet_travaille] = 0
+                reseau[octet_report] += 1
+            elif(reseau[octet_report-1] +1)<=255:
+                reseau[octet_travaille]=0 
+                reseau[octet_report]=0
+                reseau[octet_report-1]+=1
+            else: 
+                reseau[octet_travaille]=0
+                reseau[octet_report]=0
+                reseau[octet_report-1]=0
+                reseau[octet_report-2]+=1
+
+        print("%-8s %-20s %-3s %-20s %-20s %-20s" % (i+1,matrice_sr[i],pas,matrice_sr_broadcast[i],matrice_sr_premiere_ip[i],matrice_sr_derniere_ip[i]))
+    ##valeur_pas_sr=2**(nbr_bits_machines-nbr_bits_empruntes)
+        
+# nouveau pas défininif 
+def validIPV2(ip):
+
+    while True:
+
+        userIP = ip.strip()
+        segments = userIP.split(".")
+        
+
+        if len(segments) == 4:
+            if all(
+                s.isdigit() and 0 <= int(s) <= 255
+                for s in segments
+            ):
+                return segments
+
+        print("IP incorrecte.")
+
+        
+
+        
+        return 
+
 
 
 def cleanScreen():
@@ -423,3 +534,8 @@ def cleanScreen():
         os.system('cls')
     else:
         os.system('clear')
+
+
+var_test ="192.168.255.0"
+##test 
+decoupe_reseau_par_nombre_sr(var_test, 20, 20)
