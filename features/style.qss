@@ -1,0 +1,52 @@
+
+QDialog {
+  background-color: #23359d;
+}
+
+/* Panneau blanc semi-transparent */
+#zone_boutons {
+    background-color:rgb(244, 243, 243);
+    border-radius: 5px;
+    border: 2px solid white;
+}
+
+
+#label_boutons {
+    background-color: #23359d;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    border: 2px solid white;
+    border-radius: 10px;
+    padding: 10px 16px;
+}
+QPushButton{
+    background-color: #6e92d0;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    border: 2px solid white;
+    border-radius: 10px;
+    padding: 10px 16px;
+}
+
+#label_boutons {
+    font-size: 17px;
+}
+
+QPushButton:hover {
+    background-color: #23359d;
+}
+
+QPushButton:pressed {
+    background-color: #1127a0;
+}
+#bouton_retour {
+    background-color: transparent;
+    border: 2px solid white;
+    padding: 8px 20px;
+}
+
+#bouton_retour:hover {
+    background-color: rgba(255, 255, 255, 30%);
+}
