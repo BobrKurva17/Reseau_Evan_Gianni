@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import ValidationExcelWindow 
 
 userInputIP = {}
 historicIP = []
@@ -26,23 +27,31 @@ def printTable():
         decimal = ".".join(str(int(octet, 2)) for octet in octets)
         ligne = [cidrAffiche,binaire,decimal]
         matSR.append(ligne)
+    #Nouveau - plus besoin de l'affichage 
+    #for l in matSR:
+    #    print(f"{l[0]} | {l[1]} | {l[2]}")
+       
 
-    for l in matSR:
-        print(f"{l[0]} | {l[1]} | {l[2]}")
+    
+    return matSR
+#Nouveau Fonction ajouté
+def exporterTableau(fenetre):
 
-    choix=int(input("Souhaitez-vous exporter le tableau en fichier Excel ? \n1. OUI \n2. NON"))
-    while(choix < 1 or choix > 2):
-        choix=int(input("Souhaitez-vous exporter le tableau en fichier Excel ? \n1. OUI \n2. NON"))
+    tableauSR = printTable()
+    chemin = fenetre.entree_chemin.text()
 
-    if(choix == 1):
-        exporterTableau(matSR)
+    if chemin == "":
+        fenetre.message_erreur.setText("Veuillez saisir un chemin.")
+        return
 
-#Fonction ajouté
-def exporterTableau(tableauSR):
-    chemin = str(input("Insérez le chemin absolue de votre dossier : "))
-    while chemin == "":
-        print("Chemin vide")
-        chemin = str(input("Insérez le chemin absolue de votre dossier : "))
+    if not os.path.isdir(chemin):
+        fenetre.message_erreur.setText("Le dossier indiqué n'existe pas.")
+        return
+
+    #chemin = str(input("Insérez le chemin absolue de votre dossier : "))
+    #while chemin == "":
+    #    print("Chemin vide")
+    #    chemin = str(input("Insérez le chemin absolue de votre dossier : "))
 
     if not chemin.endswith("\\"):
         chemin += "\\"
@@ -536,6 +545,6 @@ def cleanScreen():
         os.system('clear')
 
 
-var_test ="192.168.255.0"
+##var_test ="192.168.255.0"
 ##test 
-decoupe_reseau_par_nombre_sr(var_test, 20, 20)
+##decoupe_reseau_par_nombre_sr(var_test, 20, 20)

@@ -41,12 +41,44 @@ QPushButton:hover {
 QPushButton:pressed {
     background-color: #1127a0;
 }
-#bouton_retour {
+#bouton,#bouton_valider {
     background-color: transparent;
     border: 2px solid white;
-    padding: 8px 20px;
+    padding: 5px 20px;
 }
 
-#bouton_retour:hover {
+#bouton:hover,#bouton_valider:hover {
     background-color: rgba(255, 255, 255, 30%);
+}
+QTableWidget{
+    color:black;
+    font-size:15px;
+    padding : 3px ;
+    
+    background-color:antiquewhite;
+}
+QTableWidget::item{
+    text-align: center;
+}
+
+#label_titre{
+    color:black;
+    background-color:antiquewhite; 
+    font-size:20px; 
+    border-radius : 5px; 
+    border: 2px solid black;
+    padding: 8px 20px;
+}
+#label_chemin{
+    color:black;
+    background-color:antiquewhite; 
+    font-size:13px; 
+    border-radius : 5px; 
+    border: 2px solid black;
+    padding: 5px;
+}
+#message_erreur {
+    color: #e74c3c;
+    font-size: 14px;
+    font-weight: bold;
 }
