@@ -4,12 +4,14 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QDialog, QVBoxLayout, QFrame,QHBoxLayout
 from PyQt6.QtWidgets import QTableWidget,QTableWidgetItem, QHeaderView,QAbstractItemView
 import ValidationExcelWindow
+import menuWindow 
 
 class CIDR_Window(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        #instance de l'autre fenêtre 
+        #instance de l'autre de la création du fichier Excel
         self.VEW = None
+        self.menuW = None
         self.setGeometry(250, 100, 1000, 750)
         self.setWindowTitle("IPPY")
 
@@ -106,11 +108,23 @@ class CIDR_Window(QDialog):
         
 
         bouton_toExcel.clicked.connect(self.appel_ValidationExcel)
+        bouton_retour.clicked.connect(self.appel_menuWindow)
+    def appel_menuWindow(self):
+        #instanciation des autres fenêtres possibles 
+                if self.menuW is None :
+                    self.menuW=menuWindow.Menu_Window()
+                    self.menuW.show() 
+                    self.close()
+                else: 
+                    self.menuW.close()
+                    self.menuW = None
+
     def appel_ValidationExcel(self):
         #instanciation des autres fenêtres possibles 
         if self.VEW is None :
             self.VEW=ValidationExcelWindow.ValidationExcel_Window()
             self.VEW.show() 
+            self.close()
         else: 
             self.VEW.close()
             self.VEW = None

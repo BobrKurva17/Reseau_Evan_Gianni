@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import ValidationExcelWindow 
 
 userInputIP = {}
 historicIP = []
@@ -14,8 +15,8 @@ index = 0
 def printTable():
     matSR = []
 
-    print("\nCIDR | BINAIRE                              | DECIMAL")
-    print("-" * 65)
+    #print("\nCIDR | BINAIRE                              | DECIMAL")
+    #print("-" * 65)
 
     for cidr in range(8, 31): 
         cidrAffiche = "/"+str(cidr)

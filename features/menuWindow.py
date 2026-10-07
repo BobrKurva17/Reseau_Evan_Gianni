@@ -2,7 +2,7 @@ import tool
 import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QDialog, QVBoxLayout, QFrame,QHBoxLayout
-
+import CIDRWindow
 
 class Menu_Window(QDialog):
     def __init__(self, parent=None):
@@ -10,6 +10,8 @@ class Menu_Window(QDialog):
         self.setGeometry(250, 100, 1000, 750)
         self.setWindowTitle("Test")
 
+        #initialisation de l'instance de la fenêtre CIDRWindows permet le retour en arriêre 
+        self.CIDRW = None 
         # marges autour du panneau : laissent voir le fond
         layout_principal = QVBoxLayout(self)
         ##layout_principal.setContentsMargins(10, 20, 60, 40)
@@ -51,9 +53,17 @@ class Menu_Window(QDialog):
         layout_bas.addStretch()          # pousse le bouton vers la gauche
         layout_principal.addLayout(layout_bas)
 
-        self.buttonCIDR.clicked.connect(tool.printTable)
+        self.buttonCIDR.clicked.connect(self.appel_CIDRWindow)
 
-        
+    def appel_CIDRWindow(self):
+        #instanciation des autres fenêtres possibles 
+        if self.CIDRW is None :
+            self.CIDRW=CIDRWindow.CIDR_Window()
+            self.CIDRW.show() 
+            self.close()
+        else: 
+            self.CIDRW.close()
+            self.CIDRW = None
 
 
 if __name__ == '__main__':

@@ -1,8 +1,8 @@
 import tool
 import sys
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QDialog, QVBoxLayout, QFrame,QHBoxLayout
-from PyQt6.QtWidgets import QTableWidget,QTableWidgetItem, QHeaderView,QAbstractItemView, QLineEdit
+from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QDialog, QVBoxLayout,QHBoxLayout
+from PyQt6.QtWidgets import  QLineEdit
 import CIDRWindow
 
 class ValidationExcel_Window(QDialog):
@@ -11,7 +11,8 @@ class ValidationExcel_Window(QDialog):
 
         self.setGeometry(400, 250, 475, 300)
         self.setWindowTitle("IPPY")
-
+        #initialisation de l'instance de la fenêtre CIDRWindows permet le retour en arriêre 
+        self.CIDRW = None 
         # Layout principal de la fenêtre
         layout_principal = QVBoxLayout(self)
         layout_principal.setContentsMargins(30, 30, 30, 25)
@@ -43,10 +44,10 @@ class ValidationExcel_Window(QDialog):
             self.entree_chemin,
             alignment=Qt.AlignmentFlag.AlignCenter
         )
-        message_erreur = QLabel("")
-        message_erreur.setObjectName("message_erreur")
+        self.message_erreur = QLabel("")
+        self.message_erreur.setObjectName("message_erreur")
 
-        layout_input.addWidget(message_erreur)
+        layout_input.addWidget(self.message_erreur)
         # partie bouton 
 
         layout_bas = QHBoxLayout()
@@ -67,8 +68,17 @@ class ValidationExcel_Window(QDialog):
         layout_principal.addLayout(layout_bas)
 
         bouton_valider.clicked.connect(lambda: tool.exporterTableau(self))
-        ##bouton_retour.clicked.connect(CIDRWindow)
-                    
+        bouton_retour.clicked.connect(self.appel_CIDRWindow)
+
+    def appel_CIDRWindow(self):
+            #instanciation des autres fenêtres possibles 
+            if self.CIDRW is None :
+                self.CIDRW=CIDRWindow.CIDR_Window()
+                self.CIDRW.show() 
+                self.close()
+            else: 
+                self.CIDRW.close()
+                self.CIDRW = None       
 
 
 if __name__ == '__main__':
