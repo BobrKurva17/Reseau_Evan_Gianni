@@ -127,6 +127,7 @@ def showInputIP():
             ip_string += f"/{entree['cidr']}"
 
         print(f"{entree['id']:4}. | {ip_string}")
+        return ip_string 
 
 
 def deleteIP():
