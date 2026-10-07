@@ -36,6 +36,6 @@ print("""
 ──────────────────────────────────────────────────────────────                                     
 """)
 
-firstLaunch()
-user = login()
-home(user)
+firstLaunch(cnx)
+user = login(cnx)
+home(user,cnx)
