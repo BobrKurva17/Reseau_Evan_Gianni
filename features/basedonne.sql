@@ -1,4 +1,5 @@
 create database if not exists Ippy_DB;
+use Ippy_DB;
 
 create table if not exists user(
     id INT AUTO_INCREMENT PRIMARY KEY,
