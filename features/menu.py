@@ -6,7 +6,7 @@ from features.tool import *
 # Temps exprimer en seconde
 _Waiting_Time = 1.5
 
-def home(user):
+def home(user,cnx):
   while(1):
     print("""         
 ┌───────────────────────────────────────────────┐
@@ -20,7 +20,7 @@ def home(user):
 │ |__/     |__/ \_______/|__/  |__/ \______/    │
 └───────────────────────────────────────────────┘                    
 """)
-    print(f"Connecté en tant que : {user['username']} ({user['role']})")
+    print(f"Connecté en tant que : {user[1]} ({user[2]})")
     print("\nP. Mon profil")
     print("A. Menu Admin\n")
     print("1. Tableau des masques\n───────────────────────────────")
@@ -78,14 +78,14 @@ def home(user):
       case "0":
         leave()
       case "a":
-        if user["role"] == "admin" or user["role"] == "superadmin":
-          menuAdmin(user)
+        if user[2] == "admin" or user[2] == "superadmin":
+          menuAdmin(user,cnx)
         else:
           print("Accès refusé")
           time.sleep(_Waiting_Time)
           cleanScreen()
       case "p":
-         user = modifierProfil(user)
+         user = modifierProfil(user,cnx)
       case _:
         print("Choix invalide")
         time.sleep(_Waiting_Time)
@@ -95,7 +95,7 @@ def leave():
   print("───────── Fin de programme ─────────")
   sys.exit()
 
-def menuAdmin(user):
+def menuAdmin(user,cnx):
   
   while(1):
     print("\n───────── ADMINISTRATION ─────────")
@@ -107,15 +107,15 @@ def menuAdmin(user):
     match key:
       case "1":
         print("\n───────── AJOUTER UN UTILISATEUR ─────────")
-        register(user)
+        register(user,cnx)
       case "2":
         print("\n───────── LISTE DES UTILISATEURS ─────────")
-        printUsers()
+        printUsers(cnx)
       case "3":
         print("\n───────── SUPPRIMER UN UTILISATEUR ─────────")
-        deletUser(user)
+        deletUser(user,cnx)
       case "4":
-        home(user)
+        home(user,cnx)
       case _:
         print("Choix invalide")
         time.sleep(_Waiting_Time)

@@ -7,7 +7,7 @@ create table if not exists user(
     roles VARCHAR(255) NOT NULL,
     pswd VARCHAR(255) NOT NULL,
     isActive BOOLEAN default true,
-    codeSecret VARCHAR(255) not null
+    codeSecret VARCHAR(255)
 )engine=InnoDB;
 
 create table if not exists historicUser(

@@ -37,5 +37,5 @@ print("""
 """)
 
 firstLaunch(cnx)
-#user = login(cnx)
-#home(user)
+user = login(cnx)
+home(user,cnx)

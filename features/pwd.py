@@ -12,6 +12,7 @@ def loadUsers(cnx):
     user = cursorSelect.fetchall()
     if len(user) == 0:
         return []
+    print(user)
     return user
 
 
@@ -101,14 +102,12 @@ def firstLaunch(cnx):
 
 #Inscription d'un nouvel utilisateur (admin ou superadmin seulement)
 def register(admin_user,cnx):
-    if admin_user["role"] != "admin" and admin_user["role"] != "superadmin":
-        print("Accès refusé")
-        return
+
     users = loadUsers(cnx)
     username = input("Nom d'utilisateur : ").strip()
     # On vérifie si le username existe déjà
     for u in users:
-        if u["username"] == username:
+        if u[2] == username:
             print("Nom d'utilisateur déjà existant")
             return
     conseilsMDP()
@@ -118,21 +117,17 @@ def register(admin_user,cnx):
         if verifierMotDePasse(password):
             break
     role = input("Rôle (admin/user) : ").strip()
-    # On génère et affiche le code secret une seule fois
-    code = genererCodeSecret()
-    print(f"╔══════════════════════════════════╗")
-    print(f"║  Code secret : {code}            ║")
-    print(f"║  Notez-le bien, il ne sera       ║")
-    print(f"║  affiché qu'une seule fois !     ║")
-    print(f"╚══════════════════════════════════╝")
+
     new_user = {
         "username": username,
-        "password": hash_password(password),
-        "role": role,
-        "code_secret": hash_password(code)
+        "pswd": hash_password(password),
+        "roles": role
     }
-    users.append(new_user)
-    saveUsers(users,cnx)
+    cursortInsert = cnx.cursor()
+    cursortInsert.execute("INSERT INTO user (username, pswd, roles) VALUES (%s, %s, %s)", 
+                            (new_user["username"], new_user["pswd"], new_user["roles"]))  
+    cnx.commit()
+
     print("Utilisateur ajouté avec succès")
     print("Votre mot de passe à correctement été HASH et stocker")
 
@@ -147,7 +142,7 @@ def login(cnx):
         # On vérifie si le username existe avant de demander le mot de passe
         userTrouve = None
         for user in users:
-            if user["username"] == username:
+            if user[1] == username:
                 userTrouve = user
                 break
         
@@ -158,7 +153,7 @@ def login(cnx):
         # Username trouvé, on demande le mot de passe jusqu'à 3 fois
         while tentatives < 3:
             password = input("Mot de passe : ").strip()
-            if verify_password(password, userTrouve["password"]):
+            if verify_password(password, userTrouve[3]):
                 print("Connexion réussie !")
                 return userTrouve
             else:
