@@ -172,40 +172,37 @@ def deleteIP():
     print(f"L'ID {id_a_supprimer} a été supprimé.")
 
 
-def validIP():
-
-    while True:
-
-        userIP = input("Entrer votre adresse ip : ").strip()
-        segments = userIP.split(".")
-        cidr = None
+def validIP(fenetre):
+    
+    
+        #récupération du champn de l'ip dans la fenêtre 
+        adressIP=fenetre.champ_ip.text()
+        #userIP = input("Entrer votre adresse ip : ").strip()
+        segments = adressIP.split(".")
+        #cidr = None
 
         if len(segments) == 4:
-
-            if "/" in segments[3]:
-
-                lastSegment, cidrPart = segments[3].split("/")
-                segments[3] = lastSegment
-
-                # Vérification CIDR
-                if cidrPart.isdigit() and 8 <= int(cidrPart) <= 30:
-                    cidr = int(cidrPart)
-                else:
-                    print("CIDR invalide.")
-                    continue
-
+            # if "/" in segments[3]:
+            #     lastSegment, cidrPart = segments[3].split("/")
+            #     segments[3] = lastSegment
+            #     # Vérification CIDR
+            #     if cidrPart.isdigit() and 8 <= int(cidrPart) <= 30:
+            #         cidr = int(cidrPart)
+            #     else:
+            #         print("CIDR invalide.")
+            #         continue
             if all(
                 s.isdigit() and 0 <= int(s) <= 255
                 for s in segments
             ):
-                return segments, cidr
+                fenetre.message_erreur.setText("L'adresse IP est valide !")
+                
+            else: 
+                fenetre.message_erreur.setText("L'adresse IP contient une erreur ! Veuillez à respecter le format.")
+        else:
+            fenetre.message_erreur.setText("Une adresse IP doit contenir 4 segments ")
 
-        print("IP incorrecte.")
-
-        restart = input("Voulez-vous recommencer ? (O/N) : ").strip().lower()
-
-        if restart == "n":
-            return None,None
+        
 
 
 def convertDecimalBinaire():

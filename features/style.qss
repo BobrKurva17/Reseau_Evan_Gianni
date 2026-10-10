@@ -3,7 +3,14 @@ QDialog {
   background-color: #23359d;
 }
 
-/* Panneau blanc semi-transparent */
+#conteneur_action{
+    background-color:antiquewhite;
+    border-radius: 5px;
+    border: 2px solid white; 
+    color: black; 
+    text-align:center;
+}
+
 #zone_boutons {
     background-color:rgb(244, 243, 243);
     border-radius: 5px;
@@ -68,6 +75,15 @@ QTableWidget::item{
     border-radius : 5px; 
     border: 2px solid black;
     padding: 8px 20px;
+}
+#label_action{   
+    color:black;
+    background-color:antiquewhite; 
+    font-size:14px; 
+    padding: 5px;
+    margin: 10px; 
+    text-align: center;
+    font-weight: bold;
 }
 #label_chemin{
     color:black;

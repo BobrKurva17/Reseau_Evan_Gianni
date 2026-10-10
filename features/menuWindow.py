@@ -2,7 +2,7 @@ import tool
 import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QDialog, QVBoxLayout, QFrame,QHBoxLayout
-import CIDRWindow
+import CIDRWindow, ValidationInput_Window
 
 class Menu_Window(QDialog):
     def __init__(self, parent=None):
@@ -12,6 +12,7 @@ class Menu_Window(QDialog):
 
         #initialisation de l'instance de la fenêtre CIDRWindows permet le retour en arriêre 
         self.CIDRW = None 
+        self.VIW = None 
         # marges autour du panneau : laissent voir le fond
         layout_principal = QVBoxLayout(self)
         ##layout_principal.setContentsMargins(10, 20, 60, 40)
@@ -55,6 +56,8 @@ class Menu_Window(QDialog):
 
         self.buttonCIDR.clicked.connect(self.appel_CIDRWindow)
 
+        self.buttonIP_Format_Valide.clicked.connect(self.appel_IPWindow)
+
     def appel_CIDRWindow(self):
         #instanciation des autres fenêtres possibles 
         if self.CIDRW is None :
@@ -64,6 +67,15 @@ class Menu_Window(QDialog):
         else: 
             self.CIDRW.close()
             self.CIDRW = None
+
+    def appel_IPWindow(self):
+        if self.VIW is None:
+            self.VIW = ValidationInput_Window.ValidationInput_Window()
+            self.VIW.show()
+            self.close()
+        else: 
+            self.VIW.close()
+            self.VIW = None 
 
 
 if __name__ == '__main__':
