@@ -1,3 +1,4 @@
+drop database Ippy_DB;
 create database if not exists Ippy_DB;
 use Ippy_DB;
 

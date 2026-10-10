@@ -4,16 +4,7 @@ import bcrypt as bc
 import json
 
 _security = 12
-
-#Charger les utilisateurs depuis un fichier JSON
-def loadUsers(cnx):
-    cursorSelect = cnx.cursor()
-    cursorSelect.execute("SELECT * FROM user")
-    user = cursorSelect.fetchall()
-    if len(user) == 0:
-        return []
-    print(user)
-    return user
+    
 
 
 #Sauvegarder les utilisateurs dans un fichier JSON
@@ -40,6 +31,33 @@ def genererCodeSecret():
     caracteres = string.ascii_uppercase + string.digits
     code = "".join(random.choice(caracteres) for _ in range(8))
     return code
+
+def donnerCodeSecret(cnx):
+    cursor = cnx.cursor()
+    
+    printUsers(cnx)
+    indice = input("Insérez l'indice : ").strip()
+
+    cursor.execute("SELECT * FROM user WHERE id = %s", (indice,))
+    user = cursor.fetchone()
+
+    while user is None:
+        if user is None:
+            print("Utilisateur introuvable")
+        indice = input("Insérez l'indice : ").strip()
+        cursor.execute("SELECT * FROM user WHERE id = %s", (indice,))
+        user = cursor.fetchone()
+
+    newcode = genererCodeSecret()
+    hashedCode = hash_password(newcode)
+    cursor.execute("UPDATE user SET codeSecret = %s WHERE id = %s", (hashedCode, indice))
+    cnx.commit()
+    print(f"╔══════════════════════════════════╗")
+    print(f"║  Code secret : {newcode}         ║")
+    print(f"║  Notez-le bien, il ne sera       ║")
+    print(f"║  affiché qu'une seule fois !     ║")
+    print(f"╚══════════════════════════════════╝")
+
 
 #Afficher les conseils pour un bon mot de passe
 def conseilsMDP():
@@ -69,8 +87,14 @@ def verifierMotDePasse(password):
 
 #Premier lancement : créer le super admin si aucun utilisateur n'existe
 def firstLaunch(cnx):
-    users = loadUsers(cnx)
-    if len(users) == 0:
+
+    #Vérifier si la base de données est vide
+    cursor = cnx.cursor()
+    cursor.execute("SELECT COUNT(*) FROM user")
+    (count,) = cursor.fetchone()
+    cursor.close()
+
+    if count == 0:
         print("\n───────── PREMIER LANCEMENT ─────────")
         print("Aucun administrateur trouvé. Créez le super admin :")
         username = input("Nom d'utilisateur : ").strip()
@@ -93,23 +117,28 @@ def firstLaunch(cnx):
             "roles": "superadmin",
             "codeSecret": hash_password(code)
         }
-        cursortInsert = cnx.cursor()
-        cursortInsert.execute("INSERT INTO user (username, pswd, roles, codeSecret) VALUES (%s, %s, %s, %s)", 
+        cursor = cnx.cursor()
+        cursor.execute("INSERT INTO user (username, pswd, roles, codeSecret) VALUES (%s, %s, %s, %s)", 
                               (superAdmin["username"], superAdmin["pswd"], superAdmin["roles"], superAdmin["codeSecret"]))  
         cnx.commit()
         print(f"Super admin '{username}' créé avec succès !")
         print("Votre mot de passe à correctement été HASH et stocker")
 
 #Inscription d'un nouvel utilisateur (admin ou superadmin seulement)
-def register(admin_user,cnx):
+def register(cnx):
+    cursor = cnx.cursor()
 
-    users = loadUsers(cnx)
     username = input("Nom d'utilisateur : ").strip()
     # On vérifie si le username existe déjà
-    for u in users:
-        if u[2] == username:
-            print("Nom d'utilisateur déjà existant")
-            return
+    cursor.execute("SELECT username FROM user where username = %s", (username,))
+    userAlreadyExists = cursor.fetchone()
+
+    while userAlreadyExists is not None:
+        print("Nom d'utilisateur déjà existant")
+        username = input("Nom d'utilisateur : ").strip()
+        cursor.execute("SELECT username FROM user where username = %s", (username,))
+        userAlreadyExists = cursor.fetchone()
+
     conseilsMDP()
     # On boucle jusqu'à ce que le mot de passe soit valide
     while True:
@@ -123,8 +152,8 @@ def register(admin_user,cnx):
         "pswd": hash_password(password),
         "roles": role
     }
-    cursortInsert = cnx.cursor()
-    cursortInsert.execute("INSERT INTO user (username, pswd, roles) VALUES (%s, %s, %s)", 
+    
+    cursor.execute("INSERT INTO user (username, pswd, roles) VALUES (%s, %s, %s)", 
                             (new_user["username"], new_user["pswd"], new_user["roles"]))  
     cnx.commit()
 
@@ -134,28 +163,25 @@ def register(admin_user,cnx):
 #Connexion au programme
 def login(cnx):
     print("\n───────── CONNEXION ─────────")
-    users = loadUsers(cnx)
+    cursor = cnx.cursor()
     tentatives = 0
     
     while True:
         username = input("Nom d'utilisateur : ").strip()
         # On vérifie si le username existe avant de demander le mot de passe
-        userTrouve = None
-        for user in users:
-            if user[1] == username:
-                userTrouve = user
-                break
-        
-        if userTrouve is None:
+        cursor.execute("SELECT * FROM user where username = %s", (username,))
+        userExists = cursor.fetchone()
+
+        if userExists is None:
             print("Utilisateur introuvable")
             continue
         
         # Username trouvé, on demande le mot de passe jusqu'à 3 fois
         while tentatives < 3:
             password = input("Mot de passe : ").strip()
-            if verify_password(password, userTrouve[3]):
+            if verify_password(password, userExists[3]):
                 print("Connexion réussie !")
-                return userTrouve
+                return userExists
             else:
                 print("Mot de passe incorrect")
                 tentatives += 1
@@ -176,79 +202,101 @@ def login(cnx):
         case "1":
             return login(cnx)
         case "2":
-            reinitialiserMDP(username)
+            reinitialiserMDP(username,cnx)
             return login(cnx)
         case _:
             exit()
 
 #Réinitialiser le mot de passe avec le code secret
 def reinitialiserMDP(username,cnx):
-    users = loadUsers(cnx)
+
+    cursor = cnx.cursor()
+    cursor.execute("SELECT codeSecret FROM user WHERE username = %s", (username,))
+    result = cursor.fetchone() #fetchone() récupère le contenu de la ligne dès qu'elle est trouvée
+
+    if result is None or result[0] is None:
+        print("Vous n'avez pas de code secret enregistré. Veuillez contacter un administrateur pour réinitialiser votre mot de passe.")
+        return
+    
     code = input("Code secret : ").strip()
-    for user in users:
-        if user["username"] == username:
-            if verify_password(code, user["code_secret"]):
-                conseilsMDP()
-                while True:
-                    newPassword = input("Nouveau mot de passe : ").strip()
-                    if verifierMotDePasse(newPassword):
-                        break
-                user["password"] = hash_password(newPassword)
-                saveUsers(users,cnx)
-                print("Mot de passe réinitialisé avec succès !")
-                return
-            else:
-                print("Code secret incorrect !")
-                return
-    print("Utilisateur introuvable !")
+    if(verify_password(code, result[0])):
+        conseilsMDP()
+        while True:
+            newPassword = input("Nouveau mot de passe : ").strip()
+            if verifierMotDePasse(newPassword):
+                break
+        hashedPassword = hash_password(newPassword)
+        cursor.execute("UPDATE user SET pswd = %s WHERE username = %s", (hashedPassword, username))
+        cnx.commit()
+        print("Mot de passe réinitialisé avec succès !")
 
 #Afficher la liste des utilisateurs
 def printUsers(cnx):
-    users = loadUsers(cnx)
+    cursorSelect = cnx.cursor()
+    cursorSelect.execute("SELECT * FROM user")
+    users = cursorSelect.fetchall()
+
     for user in users:
-        print(f"Utilisateur: {user['username']}, Rôle: {user['role']}")
+        print(f"{user[0]} Nom d'utilisateur : {user[1]}, Rôle : {user[2]}")
+    
 
 #Supprimer un utilisateur (impossible de supprimer le superadmin)
 def deletUser(admin_user,cnx):
-    users = loadUsers(cnx)
-    username = input("Nom d'utilisateur à supprimer : ").strip()
-    for user in users:
-        if user["username"] == username:
-            if user["role"] == "superadmin":
-                print("Impossible de supprimer le super admin !")
-                return
-            users.remove(user)
-            saveUsers(users)
-            print("Utilisateur supprimé avec succès")
-            return
-    print("Utilisateur introuvable")
+    cursor = cnx.cursor()
+
+    printUsers(cnx)
+    indice = input("Insérez l'indice : ").strip()
+
+    cursor.execute("SELECT * FROM user WHERE id = %s", (indice,))
+    user = cursor.fetchone()
+
+    while user is None or user[2] == "superadmin":
+        if user is not None and user[2] == "superadmin":
+            print("Impossible de supprimer le super admin !")
+        if user is None:
+            print("Utilisateur introuvable")
+
+        indice = input("Insérez l'indice : ").strip()
+        cursor.execute("SELECT * FROM user WHERE id = %s", (indice,))
+        user = cursor.fetchone()
+
+    print(f"Vous êtes sur le point de supprimer l'utilisateur : {user[1]} (Rôle : {user[2]})")
+    confirmation = input("Êtes-vous sûr ? (O/N) : ").strip().lower()
+    if confirmation != "o":
+        print("Suppression annulée")
+        return
+    
+    cursor.execute("DELETE FROM user WHERE id = %s", (indice,))
+    cnx.commit()
+    
 
 #Modifier le profil de l'utilisateur connecté
 def modifierProfil(user,cnx):
-    users = loadUsers(cnx)
+    cursor = cnx.cursor()
     print("\n───────── MODIFIER MON PROFIL ─────────")
     print("1. Changer mon nom d'utilisateur")
     print("2. Changer mon mot de passe")
-    print("3. Changer mon code secret")
-    print("4. Retour")
+    print("3. Retour")
     
     key = input("Votre choix : ").strip()
     match key:
         case "1":
             newUsername = input("Nouveau nom d'utilisateur : ").strip()
             # On vérifie si le nouveau username existe déjà
-            for u in users:
-                if u["username"] == newUsername:
-                    print("Nom d'utilisateur déjà existant")
-                    return user
+            cursor.execute("SELECT username FROM user where username = %s", (username,))
+            userAlreadyExists = cursor.fetchone()
+        
+            while userAlreadyExists is not None:
+                print("Nom d'utilisateur déjà existant")
+                username = input("Nom d'utilisateur : ").strip()
+                cursor.execute("SELECT username FROM user where username = %s", (username,))
+                userAlreadyExists = cursor.fetchone()
+
             # On met à jour le username
-            for u in users:
-                if u["username"] == user["username"]:
-                    u["username"] = newUsername
-                    saveUsers(users)
-                    print("Nom d'utilisateur modifié avec succès !")
-                    user["username"] = newUsername
-                    return user
+            cursor.execute("UPDATE user SET username = %s WHERE username = %s", (newUsername, user[1]))
+            cnx.commit()
+            print("Nom d'utilisateur modifié avec succès !")
+            return user
         case "2":
             conseilsMDP()
             # On boucle jusqu'à ce que le mot de passe soit valide
@@ -256,28 +304,13 @@ def modifierProfil(user,cnx):
                 newPassword = input("Nouveau mot de passe : ").strip()
                 if verifierMotDePasse(newPassword):
                     break
+            newPasswordHashed = hash_password(newPassword)
             # On met à jour le mot de passe hashé
-            for u in users:
-                if u["username"] == user["username"]:
-                    u["password"] = hash_password(newPassword)
-                    saveUsers(users,cnx)
-                    print("Mot de passe modifié avec succès !")
-                    return user
-        case "3":
-            # On génère un nouveau code secret et on l'affiche une seule fois
-            newCode = genererCodeSecret()
-            print(f"╔══════════════════════════════════╗")
-            print(f"║  Nouveau code secret : {newCode} ║")
-            print(f"║  Notez-le bien !                 ║")
-            print(f"╚══════════════════════════════════╝")
-            # On sauvegarde le code hashé
-            for u in users:
-                if u["username"] == user["username"]:
-                    u["code_secret"] = hash_password(newCode)
-                    saveUsers(users,cnx)
-            print("Code secret modifié avec succès !")
+            cursor.execute("UPDATE user SET pswd = %s WHERE username = %s", (newPasswordHashed, user[1]))
+            cnx.commit()
+            print("Nom d'utilisateur modifié avec succès !")
             return user
-        case "4":
+        case "3":
             return user
         case _:
             print("Choix invalide")

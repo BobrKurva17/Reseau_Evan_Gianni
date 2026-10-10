@@ -1,6 +1,6 @@
 import sys
 import time
-from features.pwd import deletUser, login, modifierProfil, register, printUsers
+from features.pwd import deletUser, login, modifierProfil, register, printUsers, donnerCodeSecret
 from features.tool import *
 
 # Temps exprimer en seconde
@@ -102,19 +102,22 @@ def menuAdmin(user,cnx):
     print("1. Ajouter un utilisateur")
     print("2. Afficher les utilisateurs")
     print("3. Supprimer un utilisateur")
-    print("4. Se déconnecter")
+    print("4. Generer un code secret pour un user")
+    print("5. Se déconnecter")
     key = str(input("Entrer votre choix : ")).strip()
     match key:
       case "1":
         print("\n───────── AJOUTER UN UTILISATEUR ─────────")
-        register(user,cnx)
+        register(cnx)
       case "2":
         print("\n───────── LISTE DES UTILISATEURS ─────────")
         printUsers(cnx)
       case "3":
         print("\n───────── SUPPRIMER UN UTILISATEUR ─────────")
-        deletUser(user,cnx)
+        deletUser(cnx)
       case "4":
+        donnerCodeSecret(cnx)
+      case "5":
         home(user,cnx)
       case _:
         print("Choix invalide")
