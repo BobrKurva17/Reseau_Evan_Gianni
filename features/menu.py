@@ -1,6 +1,6 @@
 import sys
 import time
-from features.pwd import deletUser, login, modifierProfil, register, printUsers, donnerCodeSecret
+from features.pwd import deletUser, modifierProfil, register, printUsers, donnerCodeSecret
 from features.tool import *
 
 # Temps exprimer en seconde

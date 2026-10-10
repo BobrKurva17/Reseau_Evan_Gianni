@@ -297,6 +297,8 @@ def modifierProfil(user,cnx):
             cnx.commit()
             print("Nom d'utilisateur modifié avec succès !")
 
+            return user
+
         case "2":
             conseilsMDP()
             # On boucle jusqu'à ce que le mot de passe soit valide
@@ -309,9 +311,11 @@ def modifierProfil(user,cnx):
             cursor.execute("UPDATE user SET pswd = %s WHERE username = %s", (newPasswordHashed, user[1]))
             cnx.commit()
             print("Nom d'utilisateur modifié avec succès !")
+
+            return user
         case "3":
-            return 
+            return user
         case _:
             print("Choix invalide")
-            return 
+            return user
         
