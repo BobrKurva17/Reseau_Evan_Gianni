@@ -241,7 +241,7 @@ def printUsers(cnx):
     
 
 #Supprimer un utilisateur (impossible de supprimer le superadmin)
-def deletUser(admin_user,cnx):
+def deletUser(cnx):
     cursor = cnx.cursor()
 
     printUsers(cnx)
@@ -283,20 +283,20 @@ def modifierProfil(user,cnx):
         case "1":
             newUsername = input("Nouveau nom d'utilisateur : ").strip()
             # On vérifie si le nouveau username existe déjà
-            cursor.execute("SELECT username FROM user where username = %s", (username,))
+            cursor.execute("SELECT username FROM user where username = %s", (newUsername,))
             userAlreadyExists = cursor.fetchone()
         
             while userAlreadyExists is not None:
                 print("Nom d'utilisateur déjà existant")
-                username = input("Nom d'utilisateur : ").strip()
-                cursor.execute("SELECT username FROM user where username = %s", (username,))
+                newUsername = input("Nom d'utilisateur : ").strip()
+                cursor.execute("SELECT username FROM user where username = %s", (newUsername,))
                 userAlreadyExists = cursor.fetchone()
 
             # On met à jour le username
             cursor.execute("UPDATE user SET username = %s WHERE username = %s", (newUsername, user[1]))
             cnx.commit()
             print("Nom d'utilisateur modifié avec succès !")
-            return user
+
         case "2":
             conseilsMDP()
             # On boucle jusqu'à ce que le mot de passe soit valide
@@ -309,10 +309,9 @@ def modifierProfil(user,cnx):
             cursor.execute("UPDATE user SET pswd = %s WHERE username = %s", (newPasswordHashed, user[1]))
             cnx.commit()
             print("Nom d'utilisateur modifié avec succès !")
-            return user
         case "3":
-            return user
+            return 
         case _:
             print("Choix invalide")
-            return user
+            return 
         
