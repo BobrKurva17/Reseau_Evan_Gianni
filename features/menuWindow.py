@@ -2,7 +2,7 @@ import tool
 import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QDialog, QVBoxLayout, QFrame,QHBoxLayout
-import CIDRWindow, ValidationInput_Window
+import CIDRWindow, ValidationInput_Window, ClasseIP_Window, Reseau_SousReseau_Window
 
 class Menu_Window(QDialog):
     def __init__(self, parent=None):
@@ -13,6 +13,8 @@ class Menu_Window(QDialog):
         #initialisation de l'instance de la fenêtre CIDRWindows permet le retour en arriêre 
         self.CIDRW = None 
         self.VIW = None 
+        self.CLIW = None
+        self.RES_SRW = None
         # marges autour du panneau : laissent voir le fond
         layout_principal = QVBoxLayout(self)
         ##layout_principal.setContentsMargins(10, 20, 60, 40)
@@ -58,6 +60,9 @@ class Menu_Window(QDialog):
 
         self.buttonIP_Format_Valide.clicked.connect(self.appel_IPWindow)
 
+        self.buttonClasse_IP.clicked.connect(self.appel_ClasseIpWindow)
+        self.buttonReseau_SR.clicked.connect(self.appel_Reseau_SousReseau_Window)
+
     def appel_CIDRWindow(self):
         #instanciation des autres fenêtres possibles 
         if self.CIDRW is None :
@@ -76,6 +81,23 @@ class Menu_Window(QDialog):
         else: 
             self.VIW.close()
             self.VIW = None 
+
+    def appel_ClasseIpWindow(self):
+        if self.CLIW is None:
+            self.CLIW = ClasseIP_Window.ClasseIP_Window()
+            self.CLIW.show()
+            self.close()
+        else: 
+            self.CLIW.close()
+            self.CLIW = None
+    def appel_Reseau_SousReseau_Window(self):
+        if self.RES_SRW is None :
+            self.RES_SRW=Reseau_SousReseau_Window.Reseau_SousReseau_Window()
+            self.RES_SRW.show()
+            self.close()
+        else:
+            self.RES_SRW.close()
+            self.RES_SRW = None
 
 
 if __name__ == '__main__':

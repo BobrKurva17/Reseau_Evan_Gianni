@@ -172,38 +172,43 @@ def deleteIP():
     print(f"L'ID {id_a_supprimer} a été supprimé.")
 
 
-def validIP(fenetre):
-    
-    
-        #récupération du champn de l'ip dans la fenêtre 
-        adressIP=fenetre.champ_ip.text()
-        #userIP = input("Entrer votre adresse ip : ").strip()
-        segments = adressIP.split(".")
-        #cidr = None
+def validIP(fenetre,ip):
 
-        if len(segments) == 4:
-            # if "/" in segments[3]:
-            #     lastSegment, cidrPart = segments[3].split("/")
-            #     segments[3] = lastSegment
-            #     # Vérification CIDR
-            #     if cidrPart.isdigit() and 8 <= int(cidrPart) <= 30:
-            #         cidr = int(cidrPart)
-            #     else:
-            #         print("CIDR invalide.")
-            #         continue
-            if all(
-                s.isdigit() and 0 <= int(s) <= 255
-                for s in segments
-            ):
-                fenetre.message_erreur.setText("L'adresse IP est valide !")
-                
-            else: 
-                fenetre.message_erreur.setText("L'adresse IP contient une erreur ! Veuillez à respecter le format.")
-        else:
-            fenetre.message_erreur.setText("Une adresse IP doit contenir 4 segments ")
 
+    segments = ip.split(".")
+
+    if len(segments) == 4:
+        if all(s.isdigit() and 0 <= int(s) <= 255 for s in segments):
+            fenetre.message_valide.setText(f"Le format de l'entrée {ip} est valide !")
+            return segments
+        else: 
+            #permet de distinguer si on parle de l'adresse ip ou le masque puisque les deux utilisent cette fonction
+            fenetre.message_erreur.setText(f"L'entrée {ip} contient une erreur ! Veuillez respecter le format.")
+    else:
+        fenetre.message_erreur.setText(f"L'entrée {ip} doit contenir 4 segments.")
+
+def MasqueValide(fenetre,masque):
+    MasqueVerif = masque.split('.')
+
+    if MasqueVerif == ['255', '255', '255', '255']:
+        fenetre.message_erreur.setText(f"le masque {masque} est invalide, les 4 octets ne peuvent pas être à 255")
+        return
+             
+    if MasqueVerif == ['0', '0', '0', '0']:
+        fenetre.message_erreur.setText(f"Le masque {masque} est invalide. Un masque ne peut pas être composé de 4 octets à 0.")
+        return
         
+    for i in range(len(MasqueVerif)):
+        if MasqueVerif[i] not in ['0', '128', '192', '224', '240', '248', '252', '254', '255']:
+            fenetre.message_erreur.setText(f"Le masque {masque} est invalide. Les nombres acceptés sont : 0, 128, 192, 224, 240, 248, 252, 254, 255")
+            return            
+             
+        if i < 3 and int(MasqueVerif[i]) < int(MasqueVerif[i+1]):
+            fenetre.message_erreur.setText(f"Le masque  {masque} est invalide. Il doit être une suite de 1 et de 0 sans interruption.")
+            return
 
+    
+    fenetre.message_valide.setText(f"Le masque {masque} est valide !")
 
 def convertDecimalBinaire():
   # On crée une liste pour stocker chaque segment converti
@@ -225,23 +230,24 @@ def convertDecimalBinaire():
         print(f"{ipDecimal} = {ipBinaire}")
 
 
-def classIP():
-    ip,cidr = selectOrInputIP()
-
+def classIP(fenetre,ip):
     if ip is None:
-        print("Opération annulée.")
         return
+    ip_a_tester= ip.split(".")
 
-    ipDecimalP1 = int(ip[0])
-    ipDecimalP2 = int(ip[1])
+    ipDecimalP1 = int(ip_a_tester[0])
+    ipDecimalP2 = int(ip_a_tester[1])
+    #test 
+    #print(ipDecimalP1,ipDecimalP2)
 
     estPrivee = False
     estReserver = False
-
-    if cidr is None:
-        match ipDecimalP1:
+    #variable permettant de générer le masque de classe 
+    cidr =0
+    match ipDecimalP1:
             case _ if 0 <= ipDecimalP1 < 128:
-                print("Classe A")
+                #print("Classe A")
+                fenetre.label_classe.setText("La classe de l'IP est : A")
                 cidr = 8
                 
                 if ipDecimalP1 == 10:
@@ -251,83 +257,132 @@ def classIP():
                     estReserver = True
 
             case _ if 128 <= ipDecimalP1 < 192:
-                print("Classe B")
+                #print("Classe B")
+                fenetre.label_classe.setText("La classe de l'IP est : B")
                 cidr = 8 * 2
                 
                 if ipDecimalP1 == 172 and (16 <= ipDecimalP2 < 32):
                     estPrivee = True
 
             case _ if 192 <= ipDecimalP1 < 224:
-                print("Classe C")
+                fenetre.label_classe.setText("La classe de l'IP est : C")
                 cidr = 8 * 3
                 
                 if ipDecimalP1 == 192 and ipDecimalP2 == 168:
                     estPrivee = True
             
             case _ if 224 <= ipDecimalP1 < 240:
-                print("Classe D")
+                #print("Classe D")
+                fenetre.label_classe.setText("La classe de l'IP est : D")
                 cidr = 0
                 estReserver = True
             
             case _ if 240 <= ipDecimalP1 < 256:
-                print("Classe E")
+                #print("Classe E")
+                fenetre.label_classe.setText("La classe de l'IP est : E")
                 cidr = 0
                 estReserver = True
-    else:
-        print("Aucune classe")
+    if(estReserver):
+        fenetre.label_adresse_specifique.setText("l'adresse de L'Ip est : réservée")
+    if(estPrivee):
+         fenetre.label_adresse_specifique.setText("l'adresse de L'Ip est : privée")
 
+    if ipDecimalP1 == 127:
+        fenetre.label_adresse_specifique.setText("l'adresse de L'Ip est : une adresse IP de loopback")
+    elif ipDecimalP1 == 169 and ipDecimalP2 == 254:
+        fenetre.label_adresse_specifique.setText("l'adresse de L'Ip est : une adresse IP de lien local")
+    else:
+        fenetre.label_adresse_specifique.setText("l'adresse de L'Ip est : une adresse IP publique")
+        
+    
     bits = "1" * cidr + "0" * (32 - cidr)
 
     masqueBinaire = ".".join( bits[i:i+8] for i in range(0, 32, 8) )
     masqueDecimal = ".".join( str(int(octet, 2)) for octet in masqueBinaire.split(".") )
 
-    strEstPrivee = "Oui" if estPrivee == True else "Non"
-    strEstReserver = "Oui" if estReserver == True else "Non"
-
-    print(f"\nLe masque de votre IP est le suivant : {masqueDecimal}")
-    print(f"Privée : {strEstPrivee}\nRéserver : {strEstReserver}")
-
+    fenetre.label_masque_classe.setText(f"Le masque de classe est :{masqueDecimal}")
     # return masqueBinaire
 
 
-def calculerReseauClassfull():
-    ip, cidr = selectOrInputIP()
+def calculerReseauClassfull(fenetre,ip,masque):
+  
+    ipDecimalP1 = int(ip.split(".")[0])
 
-    if ip is None:
-        print("Opération annulée.")
-        return
+    ip_bits = "".join(f"{int(s):08b}" for s in ip.split("."))
+   
+    masqueBinaire = []
 
-    if cidr is None:
-        print("Cette fonctionnalité nécessite un masque CIDR (ex: /26) pour découper en sous-réseau.")
-        return
+    for octet in DecimalVersBinaire(masque):
+        for bit in octet:
+            masqueBinaire.append(str(bit))
 
-    ipDecimalP1 = int(ip[0])
+    masqueBinaire = "".join(masqueBinaire)
 
-    cidr_classe = 8 if ipDecimalP1 < 128 else (16 if ipDecimalP1 < 192 else (24 if ipDecimalP1 < 224 else 0))
-    
-    if cidr_classe == 0:
-        print("Les adresses de classes D et E n'ont pas de réseau Classful standard.")
-        return
+     # Détermination du CIDR de classe
+    match ipDecimalP1:
+        case _ if 0 <= ipDecimalP1 < 128: cidr = 8
+        case _ if 128 <= ipDecimalP1 < 192: cidr = 16
+        case _ if 192 <= ipDecimalP1 < 224: cidr = 24
+        case _: cidr = 0
 
-    ip_bits = "".join(f"{int(s):08b}" for s in ip)
+    masque_classe = "1" * cidr + "0" * (32 - cidr)
 
-    bits_masque_classe = "1" * cidr_classe + "0" * (32 - cidr_classe)
-    net_bits_classe = "".join("1" if ip_bits[j] == "1" and bits_masque_classe[j] == "1" else "0" for j in range(32))
-    
+    # Réseau par défaut basé sur la classe
+    net_bits_classe = "".join("1" if ip_bits[j] == "1" and masque_classe[j] == "1" else "0" for j in range(32))
+
     octets_binaires_classe = [net_bits_classe[j:j+8] for j in range(0, 32, 8)]
-    reseau_classe = ".".join(str(int(octet, 2)) for octet in octets_binaires_classe)
-    print(f"Adresse Réseau (Classful) : {reseau_classe}")
 
-    if cidr != cidr_classe:
-        bits_masque_custom = "1" * cidr + "0" * (32 - cidr)
+    reseau_classe = ".".join(str(int(octet, 2)) for octet in octets_binaires_classe)
+    
+    fenetre.label_reseau.setText(f"le réseau est :{reseau_classe}")
+    fenetre.label_sous_reseau.setText("le sous-réseau : pas de sous-réseau")
+
+   
+        
+
+    cidr_saisi = masqueBinaire.count("1")
+    
+    if cidr != cidr_saisi:
+        bits_masque_custom = "1" * cidr_saisi + "0" * (32 - cidr_saisi)
         net_bits_custom = "".join("1" if ip_bits[j] == "1" and bits_masque_custom[j] == "1" else "0" for j in range(32))
         
         octets_binaires_custom = [net_bits_custom[j:j+8] for j in range(0, 32, 8)]
         sous_reseau = ".".join(str(int(octet, 2)) for octet in octets_binaires_custom)
-        print(f"Adresse de Sous-Réseau    : {sous_reseau}")
+        
+        fenetre.label_sous_reseau.setText(f"le sous-réseau : {sous_reseau}")
     else:
-        print("L'adresse de sous-réseau est identique à l'adresse réseau.")
+        fenetre.label_sous_reseau.setText("le sous-réseau : identique au réseau")
 
+    print("Masque binaire :", masqueBinaire)
+    print("CIDR saisi :", cidr_saisi)
+    print("CIDR classe :", cidr)
+    print("Réseau calculé :", reseau_classe)
+
+
+def DecimalVersBinaire(var):
+    liste=[]
+    # on sépare l'adresse ip en 4 parties correspondantes aux 4 octets
+    liste = var.split(".")
+    #cette variable contiendra les 4 octets binaires de notre IP 
+    Masque=[]
+    for i in range(4):
+        octetEnBinaire=TraducteurBinaire(liste[i])
+        Masque.append(octetEnBinaire)
+    
+    return Masque
+    
+def TraducteurBinaire(valeur):
+    # la valeur est reçue en String donc conversion en entier 
+    valeur_int=int(valeur)
+     # On prépare un tableau de 8 zéros (notre octet)
+    binaire = [0, 0, 0, 0, 0, 0, 0, 0]    
+    # On commence à remplir par la DROITE (indice 7)
+    i = 7
+    while valeur_int > 0 and i >= 0:
+        binaire[i] = valeur_int % 2  # On place le reste (0 ou 1)
+        valeur_int = valeur_int // 2      # On divise pour passer au bit suivant
+        i = i - 1                 # On recule d'une case vers la gauche
+    return binaire
 
 def compareNetwork():
     print("\n────────────────── COMPARAISON DE RÉSEAUX ──────────────────")

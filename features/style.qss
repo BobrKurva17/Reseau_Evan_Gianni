@@ -98,3 +98,9 @@ QTableWidget::item{
     font-size: 14px;
     font-weight: bold;
 }
+#message_valide{
+    color: #80e73c;
+    font-size: 14px;
+    font-weight: bold;
+
+}

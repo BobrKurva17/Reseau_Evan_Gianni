@@ -29,6 +29,9 @@ class ValidationInput_Window(QDialog):
             self.message_erreur = QLabel("")
             self.message_erreur.setObjectName("message_erreur")
 
+            self.message_valide = QLabel("")
+            self.message_valide.setObjectName("message_valide")
+
             self.champ_ip = QLineEdit()
             self.champ_ip.setObjectName("label_chemin")
 
@@ -38,6 +41,7 @@ class ValidationInput_Window(QDialog):
             layout_conteneur_input.addWidget(label_input, alignment=Qt.AlignmentFlag.AlignCenter)
             layout_conteneur_input.addWidget(self.champ_ip, alignment=Qt.AlignmentFlag.AlignCenter)
             layout_conteneur_input.addWidget(self.message_erreur, alignment=Qt.AlignmentFlag.AlignCenter)
+            layout_conteneur_input.addWidget(self.message_valide, alignment=Qt.AlignmentFlag.AlignCenter)
 
             # 5. Layout des boutons
             layout_bas = QHBoxLayout()
@@ -54,7 +58,7 @@ class ValidationInput_Window(QDialog):
             layout_principal.addLayout(layout_bas)
 
             #action 
-            bouton_valider.clicked.connect(lambda: tool.validIP(self))
+            bouton_valider.clicked.connect(self.Verification_IP)
             bouton_retour.clicked.connect(self.appel_menuWindow)
 
     def appel_menuWindow(self):
@@ -66,6 +70,11 @@ class ValidationInput_Window(QDialog):
             else: 
                 self.menuW.close()
                 self.menuW = None
+    def Verification_IP(self):
+         self.message_valide.setText("")
+         self.message_valide.setText("")
+         ip_a_verifier=self.champ_ip.text()
+         tool.validIP(self,ip_a_verifier)
             
 
 

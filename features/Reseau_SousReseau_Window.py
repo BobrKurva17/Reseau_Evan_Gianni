@@ -1,0 +1,141 @@
+import tool 
+import sys
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QDialog, QVBoxLayout,QHBoxLayout,QWidget
+from PyQt6.QtWidgets import  QLineEdit
+import menuWindow
+
+class Reseau_SousReseau_Window(QDialog):
+    def __init__(self, parent=None):
+            super().__init__(parent)
+
+            self.setGeometry(250, 100, 1000, 750)
+            self.setWindowTitle("IPPY")
+            self.menuW = None
+            # 1. Layout principal de la fenêtre
+            layout_principal = QVBoxLayout(self)
+
+            layout_haut=QHBoxLayout()
+            layout_haut.setContentsMargins(150, 100, 150, 200)
+            # 2. Widget conteneur pour la saisie de l'IP
+            Widget_input = QWidget()
+            Widget_input.setObjectName("conteneur_action")
+
+            # 3. Layout du widget de saisie
+            layout_conteneur_input = QVBoxLayout(Widget_input)
+            
+
+            # 4. Éléments de saisie
+            self.message_erreur = QLabel("")
+            self.message_erreur.setObjectName("message_erreur")
+
+            self.message_valide = QLabel("")
+            self.message_valide.setObjectName("message_valide")
+
+            # Ligne pour l'IP
+            layout_Ip = QHBoxLayout()
+            label_IP = QLabel("Entrer l'IP :")
+            label_IP.setObjectName("label_action")
+            self.champ_ip = QLineEdit()
+            self.champ_ip.setObjectName("label_chemin")
+            self.champ_ip.setFixedWidth(200)
+            layout_Ip.addWidget(label_IP,alignment=Qt.AlignmentFlag.AlignCenter)
+            layout_Ip.addWidget(self.champ_ip)
+            layout_Ip.addStretch()
+            layout_Ip.setSpacing(53)
+            
+
+            layout_masque = QHBoxLayout()
+            label_masque = QLabel("Entrer le masque :")
+            label_masque.setObjectName("label_action")
+            self.champ_masque_classfull = QLineEdit()
+            self.champ_masque_classfull.setObjectName("label_chemin")
+            self.champ_masque_classfull.setFixedWidth(200)
+            layout_masque.addWidget(label_masque,alignment=Qt.AlignmentFlag.AlignCenter)
+            layout_masque.addWidget(self.champ_masque_classfull)
+            layout_masque.addStretch()
+
+            self.label_sous_reseau = QLabel("le sous-réseau est :")
+            self.label_sous_reseau.setObjectName("label_action")
+
+            self.label_reseau = QLabel("le réseau :")
+            self.label_reseau.setObjectName("label_action")
+
+            label_input = QLabel("Entrer votre adresse IP au format 192.168.12.0 pour obtenir la classe du masque de l'IP")
+            label_input.setObjectName("label_action")
+
+            # Ajout des éléments dans le conteneur vertical principal (sans ajouter les inputs seuls)
+            layout_conteneur_input.addWidget(label_input, alignment=Qt.AlignmentFlag.AlignCenter)
+            layout_conteneur_input.addLayout(layout_Ip)      
+            layout_conteneur_input.addLayout(layout_masque)  
+            layout_conteneur_input.addWidget(self.message_erreur, alignment=Qt.AlignmentFlag.AlignCenter)
+            layout_conteneur_input.addWidget(self.message_valide, alignment=Qt.AlignmentFlag.AlignCenter)
+            layout_conteneur_input.addWidget(self.label_reseau, alignment=Qt.AlignmentFlag.AlignLeft)
+            layout_conteneur_input.addWidget(self.label_sous_reseau, alignment=Qt.AlignmentFlag.AlignLeft)
+           
+
+            # 5. Layout des boutons
+            layout_bas = QHBoxLayout()
+
+            bouton_retour = QPushButton("Retour")
+            bouton_valider = QPushButton("Déterminer le réseau")
+
+            layout_bas.addWidget(bouton_retour,alignment=Qt.AlignmentFlag.AlignLeft)
+            layout_bas.addWidget(bouton_valider,alignment=Qt.AlignmentFlag.AlignRight)
+
+            # 6. Composition finale de la fenêtre
+            layout_haut.addWidget(Widget_input)
+           
+            
+            layout_principal.addLayout(layout_haut)
+            layout_principal.addLayout(layout_bas)
+
+            #action 
+            bouton_valider.clicked.connect(self.demandeValidation_IP)
+            bouton_retour.clicked.connect(self.appel_menuWindow)
+            #self.champ_ip.textChanged.connect(lambda: tool.validIP(self))
+            #self.champ_masque_classfull.textChanged.connect(lambda: tool.validIP(self))
+
+    def appel_menuWindow(self):
+    #instanciation des autres fenêtres possibles 
+            if self.menuW is None :
+                self.menuW=menuWindow.Menu_Window()
+                self.menuW.show() 
+                self.close()
+            else: 
+                self.menuW.close()
+                self.menuW = None
+
+    def demandeValidation_IP(self):
+        self.message_erreur.setText("")
+        #récup champ de l'ip 
+        ip_a_verifier = self.champ_ip.text()
+        #récup champ du masque 
+        masque_a_verifier = self.champ_masque_classfull.text()
+        #vérif format de l'adresse ip
+        tool.validIP(self, ip_a_verifier)
+        if self.message_erreur.text() != "":
+            return
+        #vérif format du masque en classfull
+        tool.validIP(self, masque_a_verifier)
+        if self.message_erreur.text() != "":
+            return
+        #vérif du format logique du masque (pas possible d'avoir 255.0.255.0)
+        tool.MasqueValide(self, masque_a_verifier)
+        if self.message_erreur.text() != "":
+            return
+        # si tout est ok alors on peut calculer le RES et SR
+        tool.calculerReseauClassfull(self, ip_a_verifier, masque_a_verifier)
+
+            
+                
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    with open("features/style.qss", "r") as fichier:
+        app.setStyleSheet(fichier.read())
+
+    fenetre = Reseau_SousReseau_Window()
+    fenetre.show()
+    sys.exit(app.exec())
