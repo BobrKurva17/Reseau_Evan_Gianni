@@ -1,6 +1,6 @@
 import sys
 import time
-from features.pwd import deletUser, login, modifierProfil, register, printUsers, donnerCodeSecret
+from features.pwd import deletUser, modifierProfil, register, printUsers, donnerCodeSecret
 from features.tool import *
 
 # Temps exprimer en seconde
@@ -20,7 +20,6 @@ def home(user,cnx):
 │ |__/     |__/ \_______/|__/  |__/ \______/    │
 └───────────────────────────────────────────────┘                    
 """)
-    print(f"Connecté en tant que : {user[1]} ({user[2]})")
     print("\nP. Mon profil")
     print("A. Menu Admin\n")
     print("1. Tableau des masques\n───────────────────────────────")
