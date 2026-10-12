@@ -11,6 +11,15 @@ create table if not exists user(
     codeSecret VARCHAR(255)
 )engine=InnoDB;
 
+create table if not exists alert(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nbAlert INT default 0,
+    idUser1 INT,
+    idUser2 INT,
+    FOREIGN KEY (idUser1) REFERENCES user(id),
+    FOREIGN KEY (idUser2) REFERENCES user(id)
+)engine=InnoDB;
+
 create table if not exists historicUser(
 
 )engine=InnoDB;
