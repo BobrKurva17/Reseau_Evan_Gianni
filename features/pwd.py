@@ -227,6 +227,8 @@ def reinitialiserMDP(username,cnx):
                 break
         hashedPassword = hash_password(newPassword)
         cursor.execute("UPDATE user SET pswd = %s WHERE username = %s", (hashedPassword, username))
+        #On efface le code secret après la réinitialisation du mot de passe
+        cursor.execute("UPDATE user SET codeSecret = NULL WHERE username = %s", (username,))
         cnx.commit()
         print("Mot de passe réinitialisé avec succès !")
 
