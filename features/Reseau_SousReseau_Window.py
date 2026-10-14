@@ -3,9 +3,9 @@ import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QDialog, QVBoxLayout,QHBoxLayout,QWidget
 from PyQt6.QtWidgets import  QLineEdit
-import features.Window.menuWindow as menuWindow
+import menuWindow as menuWindow
 
-class Communication_MachineWindow(QDialog):
+class Reseau_SousReseau_Window(QDialog):
     def __init__(self, parent=None):
             super().__init__(parent)
 
@@ -32,61 +32,28 @@ class Communication_MachineWindow(QDialog):
             self.message_valide = QLabel("")
             self.message_valide.setObjectName("message_valide")
 
-            # Ligne pour l'IP de la machine 1 
-            layout_ip_M1 = QHBoxLayout()
-            label_ip_M1 = QLabel("Entrer l'IP de la machine 1:")
-            label_ip_M1.setObjectName("label_action")
-
-            self.champ_ip_M1 = QLineEdit()
-            self.champ_ip_M1.setObjectName("label_chemin")
-            self.champ_ip_M1.setFixedWidth(200)
-
-            # ligne pour l'IP de la machine 2 
-            layout_ip_M2 = QHBoxLayout()
-            layout_ip_M2 = QLabel("Entrer l'IP de la machine 1:")
-            layout_ip_M2.setObjectName("label_action")
+            # Ligne pour l'IP
+            layout_Ip = QHBoxLayout()
+            label_IP = QLabel("Entrer l'IP :")
+            label_IP.setObjectName("label_action")
+            self.champ_ip = QLineEdit()
+            self.champ_ip.setObjectName("label_chemin")
+            self.champ_ip.setFixedWidth(200)
+            layout_Ip.addWidget(label_IP,alignment=Qt.AlignmentFlag.AlignCenter)
+            layout_Ip.addWidget(self.champ_ip)
+            layout_Ip.addStretch()
+            layout_Ip.setSpacing(53)
             
-            self.champ_ip_M2 = QLineEdit()
-            self.champ_ip_M2.setObjectName("label_chemin")
-            self.champ_ip_M2.setFixedWidth(200)
 
-            #ajout des inputs au widget principale (machine1)
-            layout_ip_M1.addWidget(layout_ip_M1,alignment=Qt.AlignmentFlag.AlignCenter)
-            layout_ip_M1.addWidget(self.champ_ip_M1)
-            layout_ip_M1.addStretch()
-            layout_ip_M1.setSpacing(53)
-
-            #ajout des inputs au widget principale (machine2)
-            layout_ip_M2.addWidget(layout_ip_M2,alignment=Qt.AlignmentFlag.AlignCenter)
-            layout_ip_M2.addWidget(self.champ_ip_M2)
-            layout_ip_M2.addStretch()
-            layout_ip_M2.setSpacing(53)
-
-            
-            #masque de la machine 1
-            layout_masque_M1 = QHBoxLayout()
-            layout_masque_M1 = QLabel("Entrer le masque :")
-            layout_masque_M1.setObjectName("label_action")
-
-            self.champ_masque_classfull_M1 = QLineEdit()
-            self.champ_masque_classfull_M1.setObjectName("label_chemin")
-            self.champ_masque_classfull_M1.setFixedWidth(200)
-
-            layout_masque_M1.addWidget(layout_masque_M1,alignment=Qt.AlignmentFlag.AlignCenter)
-            layout_masque_M1.addWidget(self.champ_masque_classfull_M1)
-            layout_masque_M1.addStretch()
-            #masque de la machine 2 
-            layout_masque_M2 = QHBoxLayout()
-            layout_masque_M2 = QLabel("Entrer le masque :")
-            layout_masque_M2.setObjectName("label_action")
-            
-            self.champ_masque_classfull_M2 = QLineEdit()
-            self.champ_masque_classfull_M2.setObjectName("label_chemin")
-            self.champ_masque_classfull_M2.setFixedWidth(200)
-            
-            layout_masque_M2.addWidget(layout_masque_M1,alignment=Qt.AlignmentFlag.AlignCenter)
-            layout_masque_M2.addWidget(self.champ_masque_classfull_M1)
-            layout_masque_M2.addStretch()
+            layout_masque = QHBoxLayout()
+            label_masque = QLabel("Entrer le masque :")
+            label_masque.setObjectName("label_action")
+            self.champ_masque_classfull = QLineEdit()
+            self.champ_masque_classfull.setObjectName("label_chemin")
+            self.champ_masque_classfull.setFixedWidth(200)
+            layout_masque.addWidget(label_masque,alignment=Qt.AlignmentFlag.AlignCenter)
+            layout_masque.addWidget(self.champ_masque_classfull)
+            layout_masque.addStretch()
 
             self.label_sous_reseau = QLabel("le sous-réseau est :")
             self.label_sous_reseau.setObjectName("label_action")
@@ -99,7 +66,7 @@ class Communication_MachineWindow(QDialog):
 
             # Ajout des éléments dans le conteneur vertical principal (sans ajouter les inputs seuls)
             layout_conteneur_input.addWidget(label_input, alignment=Qt.AlignmentFlag.AlignCenter)
-            layout_conteneur_input.addLayout(layout_ip_M1)      
+            layout_conteneur_input.addLayout(layout_Ip)      
             layout_conteneur_input.addLayout(layout_masque)  
             layout_conteneur_input.addWidget(self.message_erreur, alignment=Qt.AlignmentFlag.AlignCenter)
             layout_conteneur_input.addWidget(self.message_valide, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -139,7 +106,26 @@ class Communication_MachineWindow(QDialog):
                 self.menuW.close()
                 self.menuW = None
 
-  
+    def demandeValidation_IP(self):
+        self.message_erreur.setText("")
+        #récup champ de l'ip 
+        ip_a_verifier = self.champ_ip.text()
+        #récup champ du masque 
+        masque_a_verifier = self.champ_masque_classfull.text()
+        #vérif format de l'adresse ip
+        tool.validIP(self, ip_a_verifier)
+        if self.message_erreur.text() != "":
+            return
+        #vérif format du masque en classfull
+        tool.validIP(self, masque_a_verifier)
+        if self.message_erreur.text() != "":
+            return
+        #vérif du format logique du masque (pas possible d'avoir 255.0.255.0)
+        tool.MasqueValide(self, masque_a_verifier)
+        if self.message_erreur.text() != "":
+            return
+        # si tout est ok alors on peut calculer le RES et SR
+        tool.calculerReseauClassfull(self, ip_a_verifier, masque_a_verifier)
 
             
                 

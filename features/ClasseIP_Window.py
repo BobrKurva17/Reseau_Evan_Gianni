@@ -1,9 +1,9 @@
-import tool 
+import tool
 import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QDialog, QVBoxLayout,QHBoxLayout,QWidget
 from PyQt6.QtWidgets import  QLineEdit
-import features.Window.menuWindow as menuWindow
+import menuWindow as menuWindow
 
 class ClasseIP_Window(QDialog):
     def __init__(self, parent=None):
