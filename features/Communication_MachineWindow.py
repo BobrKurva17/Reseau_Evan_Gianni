@@ -3,7 +3,7 @@ import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QDialog, QVBoxLayout,QHBoxLayout,QWidget
 from PyQt6.QtWidgets import  QLineEdit
-import features.menuWindow as menuWindow
+import menuWindow
 
 class Communication_MachineWindow(QDialog):
     def __init__(self, parent=None):
@@ -51,16 +51,16 @@ class Communication_MachineWindow(QDialog):
             self.champ_ip_M2.setFixedWidth(200)
 
             #ajout des inputs au widget principale (machine1)
-            layout_ip_M1.addWidget(layout_ip_M1,alignment=Qt.AlignmentFlag.AlignCenter)
+            #layout_ip_M1.addWidget(layout_ip_M1,alignment=Qt.AlignmentFlag.AlignCenter)
             layout_ip_M1.addWidget(self.champ_ip_M1)
             layout_ip_M1.addStretch()
             layout_ip_M1.setSpacing(53)
 
             #ajout des inputs au widget principale (machine2)
-            layout_ip_M2.addWidget(layout_ip_M2,alignment=Qt.AlignmentFlag.AlignCenter)
-            layout_ip_M2.addWidget(self.champ_ip_M2)
-            layout_ip_M2.addStretch()
-            layout_ip_M2.setSpacing(53)
+            #layout_ip_M2.addWidget(layout_ip_M2,alignment=Qt.AlignmentFlag.AlignCenter)
+           # layout_ip_M2.addWidget(self.champ_ip_M2)
+           # layout_ip_M2.addStretch()
+           #layout_ip_M2.setSpacing(53)
 
             
             #masque de la machine 1
@@ -72,7 +72,7 @@ class Communication_MachineWindow(QDialog):
             self.champ_masque_classfull_M1.setObjectName("label_chemin")
             self.champ_masque_classfull_M1.setFixedWidth(200)
 
-            layout_masque_M1.addWidget(layout_masque_M1,alignment=Qt.AlignmentFlag.AlignCenter)
+            #layout_masque_M1.addWidget(layout_masque_M1,alignment=Qt.AlignmentFlag.AlignCenter)
             layout_masque_M1.addWidget(self.champ_masque_classfull_M1)
             layout_masque_M1.addStretch()
             #masque de la machine 2 
@@ -84,8 +84,8 @@ class Communication_MachineWindow(QDialog):
             self.champ_masque_classfull_M2.setObjectName("label_chemin")
             self.champ_masque_classfull_M2.setFixedWidth(200)
             
-            layout_masque_M2.addWidget(layout_masque_M1,alignment=Qt.AlignmentFlag.AlignCenter)
-            layout_masque_M2.addWidget(self.champ_masque_classfull_M1)
+            #layout_masque_M2.addWidget(layout_masque_M1,alignment=Qt.AlignmentFlag.AlignCenter)
+            layout_masque_M2.addWidget(self.champ_masque_classfull_M2)
             layout_masque_M2.addStretch()
 
             self.label_sous_reseau = QLabel("le sous-réseau est :")
@@ -100,7 +100,7 @@ class Communication_MachineWindow(QDialog):
             # Ajout des éléments dans le conteneur vertical principal (sans ajouter les inputs seuls)
             layout_conteneur_input.addWidget(label_input, alignment=Qt.AlignmentFlag.AlignCenter)
             layout_conteneur_input.addLayout(layout_ip_M1)      
-            layout_conteneur_input.addLayout(layout_masque)  
+            ##layout_conteneur_input.addLayout(layout_masque)  
             layout_conteneur_input.addWidget(self.message_erreur, alignment=Qt.AlignmentFlag.AlignCenter)
             layout_conteneur_input.addWidget(self.message_valide, alignment=Qt.AlignmentFlag.AlignCenter)
             layout_conteneur_input.addWidget(self.label_reseau, alignment=Qt.AlignmentFlag.AlignLeft)
@@ -141,15 +141,12 @@ class Communication_MachineWindow(QDialog):
 
   
 
-            
-                
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     with open("features/style.qss", "r") as fichier:
         app.setStyleSheet(fichier.read())
 
-    fenetre = Reseau_SousReseau_Window()
+    fenetre = Communication_MachineWindow()
     fenetre.show()
     sys.exit(app.exec())
