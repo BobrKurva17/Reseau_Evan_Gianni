@@ -129,10 +129,10 @@ class Communication_MachineWindow(QDialog):
             #self.champ_ip.textChanged.connect(lambda: tool.validIP(self))
             #self.champ_masque_classfull.textChanged.connect(lambda: tool.validIP(self))
 
-    def appel_menuWindow(self):
+    def Communication_MachineWindow(self):
     #instanciation des autres fenêtres possibles 
             if self.menuW is None :
-                self.menuW=menuWindow.Menu_Window()
+                self.menuW=Communication_MachineWindow.Communication_MachineWindow()
                 self.menuW.show() 
                 self.close()
             else: 
