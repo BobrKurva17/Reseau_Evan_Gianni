@@ -3,9 +3,9 @@ import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QDialog, QVBoxLayout,QHBoxLayout,QWidget
 from PyQt6.QtWidgets import  QLineEdit
-import menuWindow
+import features.Window.menuWindow as menuWindow
 
-class ClasseIP_Window(QDialog):
+class ValidationInput_Window(QDialog):
     def __init__(self, parent=None):
             super().__init__(parent)
 
@@ -31,30 +31,17 @@ class ClasseIP_Window(QDialog):
 
             self.message_valide = QLabel("")
             self.message_valide.setObjectName("message_valide")
-            
+
             self.champ_ip = QLineEdit()
             self.champ_ip.setObjectName("label_chemin")
 
-            self.label_classe = QLabel("La classe de l'IP est:")
-            self.label_classe.setObjectName("label_action")
-
-            self.label_adresse_specifique=QLabel("l'adresse de L'Ip est :")
-            self.label_adresse_specifique.setObjectName("label_action")
-
-            self.label_masque_classe=QLabel("Le masque de classe est :")
-            self.label_masque_classe.setObjectName("label_action")
-
-
-            label_input = QLabel("Entrer votre adresse IP au format 192.168.12.0 pour obtenir la classe du masque de l'IP")
+            label_input = QLabel("Entrer votre adresse IP au format 192.168.12.0")
             label_input.setObjectName("label_action")
 
             layout_conteneur_input.addWidget(label_input, alignment=Qt.AlignmentFlag.AlignCenter)
             layout_conteneur_input.addWidget(self.champ_ip, alignment=Qt.AlignmentFlag.AlignCenter)
             layout_conteneur_input.addWidget(self.message_erreur, alignment=Qt.AlignmentFlag.AlignCenter)
             layout_conteneur_input.addWidget(self.message_valide, alignment=Qt.AlignmentFlag.AlignCenter)
-            layout_conteneur_input.addWidget(self.label_classe, alignment=Qt.AlignmentFlag.AlignLeft)
-            layout_conteneur_input.addWidget(self.label_adresse_specifique, alignment=Qt.AlignmentFlag.AlignLeft)
-            layout_conteneur_input.addWidget(self.label_masque_classe, alignment=Qt.AlignmentFlag.AlignLeft)
 
             # 5. Layout des boutons
             layout_bas = QHBoxLayout()
@@ -71,9 +58,9 @@ class ClasseIP_Window(QDialog):
             layout_principal.addLayout(layout_bas)
 
             #action 
-            bouton_valider.clicked.connect(self.appel_determinerClasse)
+            bouton_valider.clicked.connect(self.Verification_IP)
             bouton_retour.clicked.connect(self.appel_menuWindow)
-            
+
     def appel_menuWindow(self):
     #instanciation des autres fenêtres possibles 
             if self.menuW is None :
@@ -83,20 +70,11 @@ class ClasseIP_Window(QDialog):
             else: 
                 self.menuW.close()
                 self.menuW = None
-    def appel_determinerClasse(self):
-        self.message_erreur.setText("")
-        self.message_valide.setText("")
-        ip_a_verifier = self.champ_ip.text()
-
-        #première vérification l'entrée respecte le format IPv4
-        tool.validIP(self, ip_a_verifier)
-        if self.message_erreur.text() != "":
-            return
-        #si format ok alors on détermine la classe 
-        tool.classIP(self,ip_a_verifier)
-
-
-
+    def Verification_IP(self):
+         self.message_valide.setText("")
+         self.message_valide.setText("")
+         ip_a_verifier=self.champ_ip.text()
+         tool.validIP(self,ip_a_verifier)
             
 
 
@@ -105,6 +83,6 @@ if __name__ == '__main__':
     with open("features/style.qss", "r") as fichier:
         app.setStyleSheet(fichier.read())
 
-    fenetre = ClasseIP_Window()
+    fenetre = ValidationInput_Window()
     fenetre.show()
     sys.exit(app.exec())

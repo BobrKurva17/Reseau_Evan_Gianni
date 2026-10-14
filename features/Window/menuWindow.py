@@ -2,7 +2,7 @@ import tool
 import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QDialog, QVBoxLayout, QFrame,QHBoxLayout
-import CIDRWindow, ValidationInput_Window, ClasseIP_Window, Reseau_SousReseau_Window
+import features.Window.CIDRWindow as CIDRWindow, features.Window.ValidationInput_Window as ValidationInput_Window, features.Window.ClasseIP_Window as ClasseIP_Window, features.Window.Reseau_SousReseau_Window as Reseau_SousReseau_Window
 
 class Menu_Window(QDialog):
     def __init__(self, parent=None):

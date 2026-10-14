@@ -3,8 +3,8 @@ import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QDialog, QVBoxLayout, QFrame,QHBoxLayout
 from PyQt6.QtWidgets import QTableWidget,QTableWidgetItem, QHeaderView,QAbstractItemView
-import ValidationExcelWindow
-import menuWindow 
+import features.Window.ValidationExcelWindow as ValidationExcelWindow
+import features.Window.menuWindow as menuWindow 
 
 class CIDR_Window(QDialog):
     def __init__(self, parent=None):
