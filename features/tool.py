@@ -384,98 +384,69 @@ def TraducteurBinaire(valeur):
         i = i - 1                 # On recule d'une case vers la gauche
     return binaire
 
-def compareNetwork():
-    print("\n────────────────── COMPARAISON DE RÉSEAUX ──────────────────")
-    machines = [
-        {"ip": None, "cidr": None},
-        {"ip": None, "cidr": None}
-    ]
-    
-    i = 0
-    
-    while i < 2:
-        print(f"\n─── Machine {i + 1} ───")
-        
-        ip, cidr = selectOrInputIP()
-        
-        if ip is None:
-            print("Opération annulée.")
-            return
-
-        while cidr is None:
-            print("Attention : Un masque (CIDR) est obligatoire pour comparer les réseaux.")
-            print(f"Veuillez ressaisir l'IP de la Machine {i + 1} avec son CIDR (ex: 192.168.1.1/24) :")
-            ip, cidr = validIP()
-            
-            if ip is None:
-                print("Opération annulée.")
-                return
-
-        machines[i]["ip"] = ip
-        machines[i]["cidr"] = cidr
-        i += 1
-
-    reseaux_calculés = []
-
-    #Nouveau Calcul du réseau 
-    reseauMachineBinaire=[]        #tableau contenant le réseau des 2 machines  (binaire)
-    masqueMachineBinaire=[]        #tableau contenant le masque des 2 machines  (binaire)
-    machineBinaire=[]              #tableau contenant l'ip des 2 machines       (binaire)
-    
-    for mach in machines:
-
-        ip_bits = "".join(f"{int(s):08b}" for s in mach["ip"])
-        machineBinaire.append(ip_bits)
-
-        bits_masque = "1" * mach["cidr"] + "0" * (32 - mach["cidr"])
-        masqueMachineBinaire.append(bits_masque)
-
-        net_bits = "".join("1" if ip_bits[j] == "1" and bits_masque[j] == "1" else "0" for j in range(32))
-        reseauMachineBinaire.append(net_bits)
-
-        octets_binaires = [net_bits[j:j+8] for j in range(0, 32, 8)]
-        
-        reseau_decimal = ".".join(str(int(octet, 2)) for octet in octets_binaires)
-        
-        reseaux_calculés.append(reseau_decimal)
-        
-    for mach in machines:
-     
-        ##Nouveau calcul 
-        ##appliquer le masque de machine 1 à la machine 2 
-        vu_par_M1 = "".join(
-        "1" if machineBinaire[1][j] == "1" and masqueMachineBinaire[0][j] == "1" else "0"
-        for j in range(32)
-        )
-
-        # M2 regarde M1 avec son propre masque
-        # appliquer le masque de la machine 2 à la machine 1 
-        vu_par_M2 = "".join(
-            "1" if machineBinaire[0][j] == "1" and masqueMachineBinaire[1][j] == "1" else "0"
-            for j in range(32)
-        )
-
-
-    m1_consideration = vu_par_M1 == reseauMachineBinaire[0]
-    m2_consideration = vu_par_M2 == reseauMachineBinaire[1]     
-    #comparaison ip machine 2 avec masque machine 1 
+def compareNetwork(fenetre,ip1,masque1,ip2,masque2):
    
-    #comparaison ip machine 1 avec masque machine 2 
-  
+    reseauMachineBinaire=[]        #réseau des 2 machines (binaire)
+    masqueMachineBinaire=[]        #masque des 2 machines (binaire)
+    machineBinaire=[]              #ip des 2 machines     (binaire)
 
-    print("\n───────── RÉSULTAT DU CALCUL RÉSEAU ─────────")
-    print(f"Réseau Machine 1 : {reseaux_calculés[0]}/{machines[0]['cidr']}")
-    print(f"Réseau Machine 2 : {reseaux_calculés[1]}/{machines[1]['cidr']}")
-    
-    print("\n───────── RÉSULTAT BILATÉRAL ─────────")
+    ip1_binaire = DecimalVersBinaire(ip1)
+    ip2_binaire = DecimalVersBinaire(ip2)
+    masque1_binaire = DecimalVersBinaire(masque1)
+    masque2_binaire = DecimalVersBinaire(masque2)
+
+    machineBinaire.append(ip1_binaire)
+    machineBinaire.append(ip2_binaire)
+    masqueMachineBinaire.append(masque1_binaire)
+    masqueMachineBinaire.append(masque2_binaire)
+
+     # Réseau de chaque machine (son ip & son propre masque)
+    for k in range(2):
+        reseau=[]
+        for i in range(4):
+            var=""
+            for j in range(8):
+                if masqueMachineBinaire[k][i][j] == 1 and machineBinaire[k][i][j] == 1:
+                    var += "1"
+                else:
+                    var += "0"
+            reseau.append(var)
+        reseauMachineBinaire.append(reseau)
+
+    # ip de chaque machine & masque de l'autre
+    communication=[]
+
+    for k in range(2): # parcourir les deux machines
+        ip_ET_Masque = []
+        if(k==0):
+            l = 1 
+        else: 
+            l = 0 
+
+        for i in range(4):# parcourir les 4 octets de l'IP
+            octet = ""
+            for j in range(8): #parcourir les 8 bits de l'octet
+                if machineBinaire[k][i][j] == 1 and masqueMachineBinaire[l][i][j] == 1:  
+                    octet += "1"
+                else:
+                    octet += "0"
+            ip_ET_Masque.append(octet)
+        communication.append(ip_ET_Masque)
+
+
+    # ip2 & masque1 == ip1 & masque1
+    m1_consideration = communication[1] == reseauMachineBinaire[0]
+    # ip1 & masque2 == ip2 & masque2
+    m2_consideration = communication[0] == reseauMachineBinaire[1]   
+
     if m1_consideration and m2_consideration:
-        print(f"les deux machines se considèrent dans le même réseau")
+        fenetre.resultat.setText("Résultat de la communication entre les machines : Les deux machines se considèrent dans le même réseau.")
     elif m1_consideration and not m2_consideration: 
-        print(f"la machine 1 se considère dans le même réseau que la machine 2  mais pas inversément")  
+        fenetre.resultat.setText("Résultat de la communication entre les machines : la machine 1 se considère dans le même réseau que la machine 2  mais pas inversément")
     elif not m1_consideration and m2_consideration : 
-        print(f"la machine 2 se considère dans le même réseau que la machine 1 mais pas inversément")
+        fenetre.resultat.setText("Résultat de la communication entre les machines : la machine 2 se considère dans le même réseau que la machine 1 mais pas inversément")
     else : 
-        print(f"les deux machines sont sur des réseau différents !")
+        fenetre.resultat.setText("Résultat de la communication entre les machines : les deux machines sont sur des réseau différents !")
 
 #Nouveau découpe réseau sur base du nombre de sous-réseaux demandés 
 def decoupe_reseau_par_nombre_sr(reseau,masque,nbr_sr):
