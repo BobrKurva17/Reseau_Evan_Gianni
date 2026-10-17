@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import (
 
 import menuWindow
 import tool
+import getpass
 
 
 class Communication_MachineWindow(QDialog):
@@ -106,11 +107,15 @@ class Communication_MachineWindow(QDialog):
 
         # 10. Layout des boutons
         layout_bas = QHBoxLayout()
-
+        #label de connexion à la base de données
+        self.label_connexion_bdd = QLabel("Connexion à la base de données :")
+        self.label_connexion_bdd.setObjectName("label_action")
+        
         bouton_retour = QPushButton("Retour")
         bouton_valider = QPushButton("Déterminer le réseau")
 
         layout_bas.addWidget(bouton_retour, alignment=Qt.AlignmentFlag.AlignLeft)
+        layout_bas.addWidget(self.label_connexion_bdd, alignment=Qt.AlignmentFlag.AlignCenter)
         layout_bas.addWidget(bouton_valider, alignment=Qt.AlignmentFlag.AlignRight)
 
         # 11. Composition finale de la fenêtre
@@ -119,8 +124,21 @@ class Communication_MachineWindow(QDialog):
         layout_principal.addLayout(layout_bas)
 
         # 12. Actions
+        self.Obj_CONN = self.connexion_bdd()
         bouton_valider.clicked.connect(self.determinerCommunication)
         bouton_retour.clicked.connect(self.appel_menuWindow)
+
+    def connexion_bdd(self):
+        # Appel de la fonction pour obtenir la connexion à la base de données
+        objet_connexion = tool.obtenir_connexion(self)
+
+        if objet_connexion is not None:
+            self.label_connexion_bdd.setText("Connexion à la base de données réussie.")
+            self.label_connexion_bdd.setStyleSheet("color: green;")
+        else:
+            self.label_connexion_bdd.setText("Échec de la connexion à la base de données.")
+            self.label_connexion_bdd.setStyleSheet("color: red;")
+        return objet_connexion
 
     def appel_menuWindow(self):
         #instanciation des autres fenêtres possibles 
@@ -131,19 +149,32 @@ class Communication_MachineWindow(QDialog):
                 else: 
                     self.menuW.close()
                     self.menuW = None
+
     def determinerCommunication(self):
         #si les champs sont valides, on appelle la fonction de comparaison des réseaux
         self.demandeValidation_IP()
-
-        tool.compareNetwork(self, self.champ_ip_M1.text(), self.champ_masque_classfull_M1.text(),
-                             self.champ_ip_M2.text(), self.champ_masque_classfull_M2.text())
+        
+       
+        # cursor = self.Obj_CONN.cursor()
+       
+        # cursor.execute(
+        #     "INSERT INTO communication_btw_devices (ip_device_1, ip_device_2, mask_device_1, mask_device_2) VALUES (%s, %s, %s, %s)",
+        #     (self.champ_ip_M1.text(), self.champ_ip_M2.text(), self.champ_masque_classfull_M1.text(), self.champ_masque_classfull_M2.text())
+        # )
+        
+        # self.Obj_CONN.commit()
+        # cursor.close()
+        
 
 
     def demandeValidation_IP(self):
-        ip_M1 = self.champ_ip_M1.text()
-        masque_M1 = self.champ_masque_classfull_M1.text()
-        ip_M2 = self.champ_ip_M2.text()
-        masque_M2 = self.champ_masque_classfull_M2.text()
+        # Effacer les anciens messages
+        self.message_erreur.setText("")
+        self.message_valide.setText("")
+        ip_M1 = self.champ_ip_M1.text().strip()
+        masque_M1 = self.champ_masque_classfull_M1.text().strip()
+        ip_M2 = self.champ_ip_M2.text().strip()
+        masque_M2 = self.champ_masque_classfull_M2.text().strip()
         #Vérification de la validité des IP et masques
         #Machine1
         tool.validIP(self, ip_M1)
@@ -165,6 +196,8 @@ class Communication_MachineWindow(QDialog):
         tool.MasqueValide(self, masque_M2)
         if self.message_erreur.text() != "":
             return
+        tool.compareNetwork(self, self.champ_ip_M1.text(), self.champ_masque_classfull_M1.text(),
+                                     self.champ_ip_M2.text(), self.champ_masque_classfull_M2.text())
 
 
 if __name__ == '__main__':

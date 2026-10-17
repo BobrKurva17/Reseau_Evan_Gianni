@@ -2,7 +2,8 @@ import os
 import pandas as pd
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QTableWidgetItem
-
+import mysql.connector
+from mysql.connector import errorcode
 userInputIP = {}
 historicIP = []
 index = 0
@@ -540,8 +541,35 @@ def decoupe_reseau_par_nombre_sr(fenetre,reseau,masque,nbr_sr):
     srTot = 2**nbr_bits_empruntes
     
     return matrice_sr, matrice_sr_broadcast,matrice_sr_premiere_ip, matrice_sr_derniere_ip, pas,srTot
-        
-# nouveau pas défininif 
+
+def obtenir_connexion(fenetre):
+    config = {
+        'user': 'root',
+        'password': '',
+        'host': 'localhost',
+        'database': 'Ippy_DB',
+        'raise_on_warnings': True
+    }
+
+    try:
+        cnx = mysql.connector.connect(**config)
+        return cnx
+
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Nom d'utilisateur ou mot de passe incorrect.")
+
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            print("La base de données n'existe pas.")
+
+        else:
+            print(err)
+
+        return None
+
+
+
+
 def validIPV2(ip):
 
     while True:
@@ -558,10 +586,6 @@ def validIPV2(ip):
                 return segments
 
         print("IP incorrecte.")
-
-        
-
-        
         return 
 
 
