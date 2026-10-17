@@ -81,7 +81,7 @@ QTableWidget::item{
     background-color:antiquewhite; 
     font-size:14px; 
     padding: 5px;
-    margin: 10px; 
+    margin: 8px; 
     text-align: center;
     font-weight: bold;
 }

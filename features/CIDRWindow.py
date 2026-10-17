@@ -1,8 +1,8 @@
 import tool
 import sys
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QDialog, QVBoxLayout, QFrame,QHBoxLayout
-from PyQt6.QtWidgets import QTableWidget,QTableWidgetItem, QHeaderView,QAbstractItemView
+from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QDialog, QVBoxLayout, QFrame,QHBoxLayout
+from PyQt6.QtWidgets import QTableWidget,QTableWidgetItem,QAbstractItemView
 import ValidationExcelWindow as ValidationExcelWindow
 import menuWindow as menuWindow 
 

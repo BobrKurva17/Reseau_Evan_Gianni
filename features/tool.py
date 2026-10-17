@@ -1,5 +1,7 @@
 import os
 import pandas as pd
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QTableWidgetItem
 
 userInputIP = {}
 historicIP = []
@@ -173,8 +175,6 @@ def deleteIP():
 
 
 def validIP(fenetre,ip):
-
-
     segments = ip.split(".")
 
     if len(segments) == 4:
@@ -237,17 +237,17 @@ def classIP(fenetre,ip):
 
     ipDecimalP1 = int(ip_a_tester[0])
     ipDecimalP2 = int(ip_a_tester[1])
-    #test 
-    #print(ipDecimalP1,ipDecimalP2)
 
     estPrivee = False
     estReserver = False
+
+    classe_a_envoyer=""
+    type_adresse_a_envoyer=""
     #variable permettant de générer le masque de classe 
     cidr =0
     match ipDecimalP1:
             case _ if 0 <= ipDecimalP1 < 128:
-                #print("Classe A")
-                fenetre.label_classe.setText("La classe de l'IP est : A")
+                classe_a_envoyer="A"
                 cidr = 8
                 
                 if ipDecimalP1 == 10:
@@ -257,42 +257,40 @@ def classIP(fenetre,ip):
                     estReserver = True
 
             case _ if 128 <= ipDecimalP1 < 192:
-                #print("Classe B")
-                fenetre.label_classe.setText("La classe de l'IP est : B")
+                classe_a_envoyer="B"
                 cidr = 8 * 2
                 
                 if ipDecimalP1 == 172 and (16 <= ipDecimalP2 < 32):
                     estPrivee = True
 
             case _ if 192 <= ipDecimalP1 < 224:
-                fenetre.label_classe.setText("La classe de l'IP est : C")
+                classe_a_envoyer="C"
                 cidr = 8 * 3
                 
                 if ipDecimalP1 == 192 and ipDecimalP2 == 168:
                     estPrivee = True
             
             case _ if 224 <= ipDecimalP1 < 240:
-                #print("Classe D")
-                fenetre.label_classe.setText("La classe de l'IP est : D")
+                classe_a_envoyer="D"
                 cidr = 0
                 estReserver = True
             
             case _ if 240 <= ipDecimalP1 < 256:
-                #print("Classe E")
-                fenetre.label_classe.setText("La classe de l'IP est : E")
+                classe_a_envoyer="E"
                 cidr = 0
                 estReserver = True
     if(estReserver):
-        fenetre.label_adresse_specifique.setText("l'adresse de L'Ip est : réservée")
+        type_adresse_a_envoyer="réservée"
+
     if(estPrivee):
-         fenetre.label_adresse_specifique.setText("l'adresse de L'Ip est : privée")
+         type_adresse_a_envoyer="privée"
 
     if ipDecimalP1 == 127:
-        fenetre.label_adresse_specifique.setText("l'adresse de L'Ip est : une adresse IP de loopback")
+        type_adresse_a_envoyer="loopback"
     elif ipDecimalP1 == 169 and ipDecimalP2 == 254:
-        fenetre.label_adresse_specifique.setText("l'adresse de L'Ip est : une adresse IP de lien local")
+        type_adresse_a_envoyer="lien local"
     else:
-        fenetre.label_adresse_specifique.setText("l'adresse de L'Ip est : une adresse IP publique")
+        type_adresse_a_envoyer="publique"
         
     
     bits = "1" * cidr + "0" * (32 - cidr)
@@ -300,8 +298,8 @@ def classIP(fenetre,ip):
     masqueBinaire = ".".join( bits[i:i+8] for i in range(0, 32, 8) )
     masqueDecimal = ".".join( str(int(octet, 2)) for octet in masqueBinaire.split(".") )
 
-    fenetre.label_masque_classe.setText(f"Le masque de classe est :{masqueDecimal}")
-    # return masqueBinaire
+    
+    return masqueDecimal,classe_a_envoyer,type_adresse_a_envoyer, estPrivee,estReserver
 
 
 def calculerReseauClassfull(fenetre,ip,masque):
@@ -449,35 +447,39 @@ def compareNetwork(fenetre,ip1,masque1,ip2,masque2):
         fenetre.resultat.setText("Résultat de la communication entre les machines : les deux machines sont sur des réseau différents !")
 
 #Nouveau découpe réseau sur base du nombre de sous-réseaux demandés 
-def decoupe_reseau_par_nombre_sr(reseau,masque,nbr_sr):
+def decoupe_reseau_par_nombre_sr(fenetre,reseau,masque,nbr_sr):
     #fonction valide mais VALIDATION DU RESEAU A IMPLEMENTER 
     #vérifier la validité du reseau 
     reseau=validIPV2(reseau)
     # vérifier la validité du masque en classless 
     if(masque<8 or masque>30):
-        print(" masque en classless invalide")
+        fenetre.message_erreur.setText("Le masque en classless est invalide !")
         return
     #vérifier la validité du nombre de sr 
     if(nbr_sr<=0):
-        print("le nombre de sous-réseau est invalide !")
+        fenetre.message_erreur.setText("le nombre de sous-réseau est invalide !")
         return 
     #nombre de bits réservé pour les machines 
     nbr_bits_hote_min=2
     # exemple avec /24 alors il me reste 8 bits pour les hôtes 
     nbr_bits_machines= 32-masque 
     nbr_bits_empruntes = 0
+
+    
     while True:
         if nbr_bits_hote_min > nbr_bits_machines-nbr_bits_empruntes:
-            print("il n'y a pas assez de bits hôtes disponible pour ce nombre de SR. ")
-            return 
+            fenetre.message_erreur.setText("il n'y a pas assez de bits hôtes disponible pour ce nombre de SR. ")
+            return [], [], [], [], None, 0 
+                 
         if(nbr_sr <= (2**nbr_bits_empruntes)):
-            print("il y a donc ",nbr_bits_empruntes," empruntés aux bits hôtes")
+            fenetre.message_valide.setText(f"il y a {2**nbr_bits_empruntes} réseaux et {nbr_bits_empruntes} bits empruntés aux bits hôtes")
             break
-        
         nbr_bits_empruntes= nbr_bits_empruntes + 1
         ##nbr de bits empruntés jusqu'à 
     nouveau_masque = masque + nbr_bits_empruntes
 
+    
+    
     if nouveau_masque <= 16:
         octet_travaille = 1
         octet_report = 0
@@ -501,8 +503,8 @@ def decoupe_reseau_par_nombre_sr(reseau,masque,nbr_sr):
     matrice_sr_derniere_ip=[]   #adresse de la dernière ip dans le SR
 
     pas = 2**(8 - nbr_bits_dans_octet)  #calcul du pas 
-    print("Num SR   adresse reseau      pas   broadcast          premiere IP             derniere IP")
-    for i in range(nbr_sr):
+   
+    for i in range(2**nbr_bits_empruntes):
 
         matrice_sr.append( reseau.copy())# le .copy me permet de garder une référence unique de chaque réseau 
         matrice_sr_broadcast.append(reseau.copy())
@@ -532,8 +534,12 @@ def decoupe_reseau_par_nombre_sr(reseau,masque,nbr_sr):
                 reseau[octet_report-1]=0
                 reseau[octet_report-2]+=1
 
-        print("%-8s %-20s %-3s %-20s %-20s %-20s" % (i+1,matrice_sr[i],pas,matrice_sr_broadcast[i],matrice_sr_premiere_ip[i],matrice_sr_derniere_ip[i]))
-    ##valeur_pas_sr=2**(nbr_bits_machines-nbr_bits_empruntes)
+        
+    #si l'utilisateur demande 7 sous-reseau alors il en obtiendra réellement 8 
+    #car 7 <= 2**3 donc 7 <= 8
+    srTot = 2**nbr_bits_empruntes
+    
+    return matrice_sr, matrice_sr_broadcast,matrice_sr_premiere_ip, matrice_sr_derniere_ip, pas,srTot
         
 # nouveau pas défininif 
 def validIPV2(ip):

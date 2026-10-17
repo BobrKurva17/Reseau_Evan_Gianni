@@ -1,5 +1,4 @@
 import sys
-
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QApplication,
@@ -43,7 +42,7 @@ class Communication_MachineWindow(QDialog):
         self.message_erreur.setObjectName("message_erreur")
 
         self.message_valide = QLabel("Résultat de la communication entre les machines :")
-        self.message_valide.setObjectName("message_valide")
+        self.message_valide.setObjectName("label_action")
 
         self.resultat = QLabel("")
         self.resultat.setObjectName("label_action")
@@ -124,14 +123,14 @@ class Communication_MachineWindow(QDialog):
         bouton_retour.clicked.connect(self.appel_menuWindow)
 
     def appel_menuWindow(self):
-        # Instanciation des autres fenêtres possibles
-        if self.menuW is None:
-            self.menuW = menuWindow.menuWindow()
-            self.menuW.show()
-            self.close()
-        else:
-            self.menuW.close()
-            self.menuW = None
+        #instanciation des autres fenêtres possibles 
+                if self.menuW is None :
+                    self.menuW=menuWindow.Menu_Window()
+                    self.menuW.show() 
+                    self.close()
+                else: 
+                    self.menuW.close()
+                    self.menuW = None
     def determinerCommunication(self):
         #si les champs sont valides, on appelle la fonction de comparaison des réseaux
         self.demandeValidation_IP()

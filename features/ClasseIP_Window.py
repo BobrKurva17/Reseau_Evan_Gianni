@@ -38,11 +38,16 @@ class ClasseIP_Window(QDialog):
             self.label_classe = QLabel("La classe de l'IP est:")
             self.label_classe.setObjectName("label_action")
 
-            self.label_adresse_specifique=QLabel("l'adresse de L'Ip est :")
+            self.label_adresse_specifique=QLabel("l'adresse de L'IP est :")
             self.label_adresse_specifique.setObjectName("label_action")
 
-            self.label_masque_classe=QLabel("Le masque de classe est :")
-            self.label_masque_classe.setObjectName("label_action")
+
+
+            self.label_privee=QLabel("L'adresse IP est privée :")
+            self.label_privee.setObjectName("label_action")
+
+            self.label_reserver=QLabel("L'adresse IP est réservée :")
+            self.label_reserver.setObjectName("label_action")
 
 
             label_input = QLabel("Entrer votre adresse IP au format 192.168.12.0 pour obtenir la classe du masque de l'IP")
@@ -54,8 +59,8 @@ class ClasseIP_Window(QDialog):
             layout_conteneur_input.addWidget(self.message_valide, alignment=Qt.AlignmentFlag.AlignCenter)
             layout_conteneur_input.addWidget(self.label_classe, alignment=Qt.AlignmentFlag.AlignLeft)
             layout_conteneur_input.addWidget(self.label_adresse_specifique, alignment=Qt.AlignmentFlag.AlignLeft)
-            layout_conteneur_input.addWidget(self.label_masque_classe, alignment=Qt.AlignmentFlag.AlignLeft)
-
+            layout_conteneur_input.addWidget(self.label_privee, alignment=Qt.AlignmentFlag.AlignLeft)
+            layout_conteneur_input.addWidget(self.label_reserver, alignment=Qt.AlignmentFlag.AlignLeft)
             # 5. Layout des boutons
             layout_bas = QHBoxLayout()
 
@@ -93,8 +98,11 @@ class ClasseIP_Window(QDialog):
         if self.message_erreur.text() != "":
             return
         #si format ok alors on détermine la classe 
-        tool.classIP(self,ip_a_verifier)
-
+        masqueDecimal,classe_a_envoyer,type_adresse_a_envoyer, estPrivee,estReserver=tool.classIP(self,ip_a_verifier)
+        self.label_classe.setText(f"La classe de l'IP est : {classe_a_envoyer}")
+        self.label_adresse_specifique.setText(f"l'adresse de L'IP est : {type_adresse_a_envoyer}")
+        self.label_privee.setText(f"L'adresse IP est privée : {estPrivee}")
+        self.label_reserver.setText(f"L'adresse IP est réservée : {estReserver}")
 
 
             
