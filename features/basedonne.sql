@@ -38,11 +38,10 @@ CREATE TABLE IF NOT EXISTS communication_btw_devices (
     ip_device_1 VARCHAR(15) NOT NULL,
     ip_device_2 VARCHAR(15) NOT NULL,
     mask_device_1 VARCHAR(15)  NOT NULL,
-    mask_device_2 VARCHAR(15) NOT NULL
+    mask_device_2 VARCHAR(15) NOT NULL,
     CONSTRAINT fk_communication_devices_user
     FOREIGN KEY (id_user) REFERENCES user(id)
 ) ENGINE=InnoDB;
---
 
 
 create table if not exists historicFunction(
@@ -63,7 +62,26 @@ create table if not exists CIDRTable(
     masque_decimal VARCHAR(15) NOT NULL
 )engine=InnoDB; 
 
+/*
 
+VALEURS DE TEST  RAPPEL A NOUS SUPPRIMER QUAND PARTIE EVAN FINIE
+INSERT INTO subnet_division
+    (id_user, subnet, subnet_mask_classless, number_of_subnets)
+VALUES
+    (1, '192.168.1.0', 24, 4),
+    (1, '192.168.10.0', 24, 8);
+
+
+    INSERT INTO communication_btw_devices
+    (id_user, ip_device_1, ip_device_2,
+     mask_device_1, mask_device_2)
+VALUES
+    (1, '192.168.1.10', '192.168.1.20',
+     '255.255.255.0', '255.255.255.0'),
+
+    (1, '192.168.1.10', '192.168.2.20',
+     '255.255.255.0', '255.255.255.0');
+*/
 /*
  REMPLIR LA TABLE CIDRTable AVEC : 
  INSERT INTO masques_cidr (cidr, masque_binaire, masque_decimal) VALUES

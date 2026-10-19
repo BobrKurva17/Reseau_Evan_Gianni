@@ -8,6 +8,7 @@ import Communication_MachineWindow as Communication_MachineWindow
 import Decoupe_SRWindow 
 import ClasseIP_Window 
 import Masque_ClasseWindow
+import Historique_ActionWindow
 class Menu_Window(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -22,6 +23,7 @@ class Menu_Window(QDialog):
         self.COM_MW = None
         self.DECOUPE_SRW = None
         self.CLASS_IPW = None
+        self.HAW = None
         # marges autour du panneau : laissent voir le fond
         layout_principal = QVBoxLayout(self)
         ##layout_principal.setContentsMargins(10, 20, 60, 40)
@@ -47,11 +49,12 @@ class Menu_Window(QDialog):
         self.buttonReseau_SR = QPushButton("Déterminer le réseau et sous-réseau")
         self.buttonMeme_reseau = QPushButton("Déterminer comment 2 machines communiquent")
         self.buttonDecoupe_SR = QPushButton("Découper un réseau en sous-réseaux")
+        self.buttonHistorique = QPushButton("Historique des actions utilisateurs")
 
         layout_boutons.addStretch()          # centre le contenu verticalement
         layout_boutons.addWidget(label_boutons)
         for bouton in (self.buttonCIDR, self.buttonIP_Format_Valide, self.buttonClasse_IP,
-                       self.buttonMasque_IP, self.buttonReseau_SR, self.buttonMeme_reseau, self.buttonDecoupe_SR):
+                       self.buttonMasque_IP, self.buttonReseau_SR, self.buttonMeme_reseau, self.buttonDecoupe_SR, self.buttonHistorique):
             layout_boutons.addWidget(bouton)
         layout_boutons.addStretch()
 
@@ -73,9 +76,17 @@ class Menu_Window(QDialog):
         self.buttonMeme_reseau.clicked.connect(self.appel_Communication_MachineWindow)
         self.buttonDecoupe_SR.clicked.connect(self.appel_DecoupeSRWindow)
         self.buttonMasque_IP.clicked.connect(self.appel_MasqueClasseWindow)
+        self.buttonHistorique.clicked.connect(self.appel_HistoriqueWindow)
         
 
-
+    def appel_HistoriqueWindow(self):
+        if self.HAW is None :
+            self.HAW = Historique_ActionWindow.Historique_ActionWindow()
+            self.HAW.show()
+            self.close()
+        else:
+            self.HAW.close()
+            self.HAW = None 
     def appel_DecoupeSRWindow(self):
         if self.DECOUPE_SRW is None:
             self.DECOUPE_SRW = Decoupe_SRWindow.Decoupe_SRWindow()
