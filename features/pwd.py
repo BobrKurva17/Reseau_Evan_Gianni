@@ -2,7 +2,7 @@ import random
 import string
 import bcrypt as bc
 import json
-
+import session
 _security = 12
     
 
@@ -162,6 +162,8 @@ def register(cnx):
 
 #Connexion au programme
 def login(cnx):
+    #l'id de l'utilisateur en cours est vidé en cas de nouvelle connexion 
+    session.id_user_actuel = None
     print("\n───────── CONNEXION ─────────")
     cursor = cnx.cursor()
     tentatives = 0
@@ -181,6 +183,8 @@ def login(cnx):
             password = input("Mot de passe : ").strip()
             if verify_password(password, userExists[3]):
                 print("Connexion réussie !")
+                #récupère l'id de l'utilisateur et le stock dans la session
+                session.id_user_actuel = userExists[0]
                 return userExists
             else:
                 print("Mot de passe incorrect")
