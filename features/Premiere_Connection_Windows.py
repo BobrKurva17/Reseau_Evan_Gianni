@@ -1,9 +1,46 @@
 import tool
 import sys
+from pwd import verifierMotDePasse, genererCodeSecret, hash_password
+from tool import obtenir_connexion
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QDialog, QVBoxLayout, QFrame,QHBoxLayout,QFormLayout,QLineEdit
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QDialog, QVBoxLayout, QFrame,QHBoxLayout,QFormLayout,QLineEdit,QMessageBox
 
 class Premiere_Connection_Windows(QDialog):
+    def valider_mot_de_passe(self):
+        self.label_erreur.setText("")  # Réinitialiser le message d'erreur
+        mdp = self.input_mdp.text()
+        mdpConfirm = self.input_confirmation.text()
+        utilisateur = self.input_username.text()
+
+        if(not utilisateur):
+            self.label_erreur.setText("Le nom d'utilisateur ne peut pas être vide")
+            return False
+
+        if(mdp != mdpConfirm):
+            self.label_erreur.setText("Les mots de passe ne correspondent pas")
+            return False
+
+        if(not verifierMotDePasse(mdp, self)):
+            return False
+
+        self.enregistrement_super_admin()
+
+    def enregistrement_super_admin(self):
+        cnx = obtenir_connexion(self)
+        cursor = cnx.cursor()
+        codeSecret = genererCodeSecret()
+        QMessageBox.warning(self, "Code secret généré", f"Le code secret généré est : {codeSecret}\nVeuillez le noter quelque part, il sera nécessaire pour la récupération du mot de passe.")
+        superAdmin = {
+            "username": self.input_username.text(),
+            "pswd": hash_password(self.input_mdp.text()),
+            "roles": "superadmin",
+            "codeSecret": hash_password(codeSecret)
+        }
+        cursor.execute("INSERT INTO user (username, pswd, roles, codeSecret) VALUES (%s, %s, %s, %s)", 
+                                (superAdmin["username"], superAdmin["pswd"], superAdmin["roles"], superAdmin["codeSecret"]))  
+        cnx.commit()
+        self.close()
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -26,6 +63,7 @@ class Premiere_Connection_Windows(QDialog):
         self.input_mdp.setEchoMode(QLineEdit.EchoMode.Password)
         self.input_mdp.setPlaceholderText("Minimum 8 caractères dont 1 chiffre, 1 majuscule et 1 caractère spécial (!@#$%&*?)")
         formulaireConnexion.addRow("Mot de passe:", self.input_mdp)
+        
         # Champ de confirmation
         self.input_confirmation = QLineEdit()
         self.input_confirmation.setEchoMode(QLineEdit.EchoMode.Password)
@@ -35,9 +73,18 @@ class Premiere_Connection_Windows(QDialog):
         layout_haut.addLayout(formulaireConnexion)
         layout_principal.addLayout(layout_haut)
 
+        # Label pour les messages d'erreur
+        self.label_erreur = QLabel()
+        self.label_erreur.setStyleSheet("color: red;")
+
+        layout_principal.addWidget(self.label_erreur)
+
         #Bouton de validation
         btn_valider = QPushButton("Valider le mot de passe")
+        btn_valider.clicked.connect(self.valider_mot_de_passe)
         layout_principal.addWidget(btn_valider)
+
+
 
 
 if __name__ == '__main__':

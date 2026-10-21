@@ -70,18 +70,18 @@ def conseilsMDP():
     print("╚══════════════════════════════════════════════╝")
 
 #Vérifier si le mot de passe respecte les conditions
-def verifierMotDePasse(password):
+def verifierMotDePasse(password,fenetre):
     if len(password) < 8:
-        print("Le mot de passe doit contenir au moins 8 caractères")
+        fenetre.label_erreur.setText("Le mot de passe doit contenir au moins 8 caractères")
         return False
     if not any(c.isupper() for c in password):
-        print("Le mot de passe doit contenir au moins une majuscule")
+        fenetre.label_erreur.setText("Le mot de passe doit contenir au moins une majuscule")
         return False
     if not any(c.isdigit() for c in password):
-        print("Le mot de passe doit contenir au moins un chiffre")
+        fenetre.label_erreur.setText("Le mot de passe doit contenir au moins un chiffre")
         return False
     if not any(c in "!@#$%&*?" for c in password):
-        print("Le mot de passe doit contenir au moins un caractère spécial (!@#$%&*?)")
+        fenetre.label_erreur.setText("Le mot de passe doit contenir au moins un caractère spécial (!@#$%&*?)")
         return False
     return True
 
