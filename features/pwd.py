@@ -239,11 +239,9 @@ def reinitialiserMDP(username,cnx):
 #Afficher la liste des utilisateurs
 def printUsers(cnx):
     cursorSelect = cnx.cursor()
-    cursorSelect.execute("SELECT * FROM user")
+    cursorSelect.execute("SELECT * FROM user where isActive = 1")
     users = cursorSelect.fetchall()
-
-    for user in users:
-        print(f"{user[0]} Nom d'utilisateur : {user[1]}, Rôle : {user[2]}")
+    return users
     
 
 #Supprimer un utilisateur (impossible de supprimer le superadmin)

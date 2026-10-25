@@ -16,6 +16,8 @@ create table if not exists alert(
     nbAlert INT default 0,
     idUser1 INT,
     idUser2 INT,
+    dateAlert1 TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dateAlert2 TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (idUser1) REFERENCES user(id),
     FOREIGN KEY (idUser2) REFERENCES user(id)
 )engine=InnoDB;
