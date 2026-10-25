@@ -142,7 +142,6 @@ class Menu_Admin_Window(QDialog):
         else:
             return
 
-
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setGeometry(250, 100, 1000, 750)

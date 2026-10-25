@@ -242,7 +242,12 @@ def printUsers(cnx):
     cursorSelect.execute("SELECT * FROM user where isActive = 1")
     users = cursorSelect.fetchall()
     return users
-    
+
+def printUsersDisabled(cnx):
+    cursorSelect = cnx.cursor()
+    cursorSelect.execute("SELECT * FROM user where isActive = 0")
+    users = cursorSelect.fetchall()
+    return users
 
 #Supprimer un utilisateur (impossible de supprimer le superadmin)
 def deletUser(cnx):
