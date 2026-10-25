@@ -1,4 +1,4 @@
-import tool
+
 import sys
 from pwd import verifierMotDePasse, genererCodeSecret, hash_password
 from tool import obtenir_connexion

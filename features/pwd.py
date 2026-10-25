@@ -24,7 +24,7 @@ def verify_password(password_input, stored_hash):
     return bc.checkpw(
         password_input.encode('utf-8'),
         stored_hash.encode('utf-8')
-    )
+)
 
 #Générer un code secret aléatoire de 8 caractères
 def genererCodeSecret():
