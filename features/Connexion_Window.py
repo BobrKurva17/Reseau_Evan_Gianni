@@ -56,6 +56,7 @@ class Premiere_Connection_Windows(QDialog):
             return False
 
         self.close()  # Fermer la fenêtre de connexion si tout est correct
+        return result[0]
 
     def __init__(self, parent=None):
         super().__init__(parent)
