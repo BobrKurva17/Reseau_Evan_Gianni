@@ -28,7 +28,12 @@ class Premiere_Connection_Windows(QDialog):
         if result is None:
             self.label_erreur.setText("Nom d'utilisateur incorrect")
             return False
-
+        
+        if result[4] == 0:
+                    QMessageBox.critical(self, "Erreur", "Votre compte est désactivé. Veuillez contacter l'administrateur.")
+                    self.close()
+                    return False
+        
         if not verify_password(mdp, result[3]):
             self.label_erreur.setText("Mot de passe incorrect")
             self.nbErreurs += 1
@@ -48,11 +53,6 @@ class Premiere_Connection_Windows(QDialog):
                     cursor.execute("UPDATE user SET isActive = 0 WHERE username = %s", (utilisateur,))
                     cnx.commit()
                     self.close()  # Fermer la fenêtre de connexion
-            return False
-
-        if result[4] == 0:
-            QMessageBox.critical(self, "Erreur", "Votre compte est désactivé. Veuillez contacter l'administrateur.")
-            self.close()
             return False
 
         self.close()  # Fermer la fenêtre de connexion si tout est correct
