@@ -15,7 +15,7 @@ class Masque_Classe_Window(QDialog):
             # 1. Layout principal de la fenêtre
             layout_principal = QVBoxLayout(self)
 
-            layout_haut=QHBoxLayout()
+            layout_haut=QVBoxLayout()
             layout_haut.setContentsMargins(150, 100, 150, 200)
             # 2. Widget conteneur pour la saisie de l'IP
             Widget_input = QWidget()
@@ -38,6 +38,10 @@ class Masque_Classe_Window(QDialog):
             self.label_masque_classe=QLabel("Le masque de classe est :")
             self.label_masque_classe.setObjectName("label_action")
 
+            label_titre=QLabel("Validation adresse IP")
+            label_titre.setObjectName("label_titre")
+            label_titre.setFixedSize(300,50)
+            label_titre.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             label_input = QLabel("Entrer votre adresse IP au format (192.168.12.0) pour obtenir le masque de classe")
             label_input.setObjectName("label_action")
@@ -58,6 +62,7 @@ class Masque_Classe_Window(QDialog):
             layout_bas.addWidget(bouton_valider,alignment=Qt.AlignmentFlag.AlignRight)
 
             # 6. Composition finale de la fenêtre
+            layout_haut.addWidget(label_titre,alignment=Qt.AlignmentFlag.AlignCenter)
             layout_haut.addWidget(Widget_input)
             layout_principal.addLayout(layout_haut)
             layout_principal.addLayout(layout_bas)
