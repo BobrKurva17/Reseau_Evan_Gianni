@@ -35,7 +35,7 @@ class Premiere_Connection_Windows(QDialog):
                     return False
         
         if not verify_password(mdp, result[3]):
-            self.label_erreur.setText("Mot de passe incorrect")
+            self.label_erreur.setText("Mot de passe incorrect.")
             self.nbErreurs += 1
             if self.nbErreurs == 3:
                 self.nbErreurs = 0  # Réinitialiser le compteur d'erreurs
