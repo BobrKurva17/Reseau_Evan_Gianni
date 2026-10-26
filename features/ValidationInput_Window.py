@@ -15,8 +15,14 @@ class ValidationInput_Window(QDialog):
             # 1. Layout principal de la fenêtre
             layout_principal = QVBoxLayout(self)
 
-            layout_haut=QHBoxLayout()
+            layout_haut=QVBoxLayout()
             layout_haut.setContentsMargins(150, 100, 150, 200)
+
+            label_titre=QLabel("Validation adresse IP")
+            label_titre.setObjectName("label_titre")
+            label_titre.setFixedSize(300,50)
+            label_titre.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
             # 2. Widget conteneur pour la saisie de l'IP
             Widget_input = QWidget()
             Widget_input.setObjectName("conteneur_action")
@@ -53,7 +59,9 @@ class ValidationInput_Window(QDialog):
             layout_bas.addWidget(bouton_valider,alignment=Qt.AlignmentFlag.AlignRight)
 
             # 6. Composition finale de la fenêtre
+            layout_haut.addWidget(label_titre,alignment=Qt.AlignmentFlag.AlignCenter)
             layout_haut.addWidget(Widget_input)
+
             layout_principal.addLayout(layout_haut)
             layout_principal.addLayout(layout_bas)
 
