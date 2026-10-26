@@ -1,4 +1,5 @@
 import random
+import tool
 import string
 import bcrypt as bc
 import json
@@ -25,6 +26,17 @@ def verify_password(password_input, stored_hash):
         password_input.encode('utf-8'),
         stored_hash.encode('utf-8')
 )
+
+#Verifier si le nom d'utilisateur existe déjà
+def verify_name(fenetre,nouveauNom):
+    cnx = tool.obtenir_connexion(fenetre)
+    cursor = cnx.cursor()
+    cursor.execute("SELECT * from user where username = %s",(nouveauNom,))
+    result = cursor.fetchone()
+    if result is None:
+        return True
+    else:
+        return False
 
 #Générer un code secret aléatoire de 8 caractères
 def genererCodeSecret():

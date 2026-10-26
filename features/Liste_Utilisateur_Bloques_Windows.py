@@ -21,8 +21,6 @@ class Liste_Utilisateur_Bloques_Windows(QDialog):
                 #ajout d'un bouton pour désactiver l'utilisateur
                 btn_activer = QPushButton("Activer")
                 btn_activer.clicked.connect(lambda checked, user_id=user[0]: self.activer_use(user_id))
-                if(user[2] == "superadmin" or user[2] == "admin"):
-                    btn_activer.setEnabled(False)
                 self.tableUser.setCellWidget(rowPosition, 3, btn_activer)
 
     def activer_use(self,id):
