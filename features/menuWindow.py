@@ -1,14 +1,19 @@
-import tool
+from . import tool
 import sys
+from . import session 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QDialog, QVBoxLayout, QFrame,QHBoxLayout
-import CIDRWindow as CIDRWindow, ValidationInput_Window as ValidationInput_Window
-import ClasseIP_Window as ClasseIP_Window, Reseau_SousReseau_Window as Reseau_SousReseau_Window
-import Communication_MachineWindow as Communication_MachineWindow
-import Decoupe_SRWindow 
-import ClasseIP_Window 
-import Masque_ClasseWindow
-import Historique_ActionWindow
+from . import CIDRWindow
+
+from . import ValidationInput_Window
+from . import ClasseIP_Window
+from . import Reseau_SousReseau_Window
+from . import Communication_MachineWindow
+from . import Decoupe_SRWindow
+from . import Masque_ClasseWindow
+from . import Historique_ActionWindow
+from . import Menu_Admin_Window
+from . import Menu_User_Window
 class Menu_Window(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -24,6 +29,13 @@ class Menu_Window(QDialog):
         self.DECOUPE_SRW = None
         self.CLASS_IPW = None
         self.HAW = None
+        self.MA = None 
+        self.MU = None
+
+        cnx = tool.obtenir_connexion(self)
+        curseur = cnx.cursor()
+        curseur.execute("SELECT * FROM USER WHERE id = %s", (session.user_actuel,))
+        self.utilisateur_actuel = curseur.fetchone()
         # marges autour du panneau : laissent voir le fond
         layout_principal = QVBoxLayout(self)
         ##layout_principal.setContentsMargins(10, 20, 60, 40)
@@ -34,9 +46,9 @@ class Menu_Window(QDialog):
         zone_boutons.setObjectName("zone_boutons")
 
         # marges internes : le label et les boutons ne touchent pas les bords du panneau
-        layout_boutons = QVBoxLayout(zone_boutons)
-        layout_boutons.setContentsMargins(60, 30, 60, 30)
-        layout_boutons.setSpacing(20)
+        self.layout_boutons = QVBoxLayout(zone_boutons)
+        self.layout_boutons.setContentsMargins(60, 30, 60, 30)
+        self.layout_boutons.setSpacing(10)
 
         label_boutons = QLabel("Que souhaitez vous faire aujourd'hui ?")
         label_boutons.setObjectName("label_boutons")
@@ -50,14 +62,15 @@ class Menu_Window(QDialog):
         self.buttonMeme_reseau = QPushButton("Déterminer comment 2 machines communiquent")
         self.buttonDecoupe_SR = QPushButton("Découper un réseau en sous-réseaux")
         self.buttonHistorique = QPushButton("Historique des actions utilisateurs")
+        self.buttonProfil = QPushButton("Profil")
 
-        layout_boutons.addStretch()          # centre le contenu verticalement
-        layout_boutons.addWidget(label_boutons)
+        self.layout_boutons.addStretch()          # centre le contenu verticalement
+        self.layout_boutons.addWidget(label_boutons)
         for bouton in (self.buttonCIDR, self.buttonIP_Format_Valide, self.buttonClasse_IP,
-                       self.buttonMasque_IP, self.buttonReseau_SR, self.buttonMeme_reseau, self.buttonDecoupe_SR, self.buttonHistorique):
-            layout_boutons.addWidget(bouton)
-        layout_boutons.addStretch()
-
+                       self.buttonMasque_IP, self.buttonReseau_SR, self.buttonMeme_reseau, self.buttonDecoupe_SR, self.buttonHistorique, self.buttonProfil):
+            self.layout_boutons.addWidget(bouton)
+        self.layout_boutons.addStretch()
+        self.Acces_Admin()
         layout_principal.addWidget(zone_boutons, alignment=Qt.AlignmentFlag.AlignCenter)
         # ligne du bas : bouton retour à gauche
         layout_bas = QHBoxLayout()
@@ -77,8 +90,33 @@ class Menu_Window(QDialog):
         self.buttonDecoupe_SR.clicked.connect(self.appel_DecoupeSRWindow)
         self.buttonMasque_IP.clicked.connect(self.appel_MasqueClasseWindow)
         self.buttonHistorique.clicked.connect(self.appel_HistoriqueWindow)
+        self.buttonProfil.clicked.connect(self.appel_Menu_User)
         
-
+    def Acces_Admin(self):
+        
+        #on vérifie si c'est un admin 
+        if(self.utilisateur_actuel[2]=="admin" or self.utilisateur_actuel[2]=="superadmin" ):
+            
+            self.buttonAdmin = QPushButton("Menu Administrateur")
+            self.layout_boutons.addWidget(self.buttonAdmin)
+            self.buttonAdmin.clicked.connect(self.appel_Menu_Admin)
+            
+    def appel_Menu_User(self):
+        if self.MU is None :
+            self.MU = Menu_User_Window.Menu_User_Window()
+            self.MU.show()
+            self.close()
+        else:
+            self.MU.close()
+            self.MU = None
+    def appel_Menu_Admin(self):
+        if self.MA is None :
+            self.MA = Menu_Admin_Window.Menu_Admin_Window()
+            self.MA.show()
+            self.close()
+        else:
+            self.MA.close()
+            self.MA = None  
     def appel_HistoriqueWindow(self):
         if self.HAW is None :
             self.HAW = Historique_ActionWindow.Historique_ActionWindow()

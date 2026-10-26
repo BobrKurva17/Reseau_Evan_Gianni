@@ -1,10 +1,9 @@
-import tool
+from . import tool
 import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QDialog, QVBoxLayout,QHBoxLayout,QWidget
 from PyQt6.QtWidgets import  QLineEdit
-import menuWindow as menuWindow
-
+from . import menuWindow
 class Masque_Classe_Window(QDialog):
     def __init__(self, parent=None):
             super().__init__(parent)

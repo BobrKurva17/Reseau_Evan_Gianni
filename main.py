@@ -2,6 +2,12 @@ from features.menu import *
 from features.pwd import login, firstLaunch
 import mysql.connector
 from mysql.connector import errorcode
+import sys
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication
+from features.Premiere_Connection_Windows import Premiere_Connection_Windows
+from features.Connexion_Window import Connection_Windows
+##from features import session as sess
 
 # Configuration de la base de données
 config = {
@@ -36,6 +42,27 @@ print("""
 ──────────────────────────────────────────────────────────────                                     
 """)
 
-firstLaunch(cnx)
-user = login(cnx)
-home(user,cnx)
+ #firstLaunch(cnx)
+
+##user = login(cnx)
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+
+    with open("features/style.qss", "r", encoding="utf-8") as fichier:
+        app.setStyleSheet(fichier.read())
+
+    cursor = cnx.cursor()
+    cursor.execute("SELECT COUNT(*) FROM user")
+    (count,) = cursor.fetchone()
+    cursor.close()
+
+    if count == 0 : 
+        fenetre = Premiere_Connection_Windows()
+    else :
+        fenetre = Connection_Windows()
+    
+    fenetre.show()
+    sys.exit(app.exec())
+##home(user,cnx)

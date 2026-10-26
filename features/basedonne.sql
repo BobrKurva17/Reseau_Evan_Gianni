@@ -25,6 +25,7 @@ create table if not exists alert(
 CREATE TABLE IF NOT EXISTS subnet_division (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_user INT NOT NULL,
+    username VARCHAR(255) NOT NULL,
     subnet VARCHAR(15) NOT NULL,
     subnet_mask_classless TINYINT UNSIGNED NOT NULL,
     number_of_subnets INT UNSIGNED NOT NULL,
@@ -37,6 +38,7 @@ CREATE TABLE IF NOT EXISTS subnet_division (
 CREATE TABLE IF NOT EXISTS communication_btw_devices (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_user INT NOT NULL,
+     username VARCHAR(255) NOT NULL,
     ip_device_1 VARCHAR(15) NOT NULL,
     ip_device_2 VARCHAR(15) NOT NULL,
     mask_device_1 VARCHAR(15)  NOT NULL,
@@ -44,18 +46,6 @@ CREATE TABLE IF NOT EXISTS communication_btw_devices (
     CONSTRAINT fk_communication_devices_user
     FOREIGN KEY (id_user) REFERENCES user(id)
 ) ENGINE=InnoDB;
-
-
-create table if not exists historicFunction(
-
-)engine=InnoDB;
-
-create table if not exists subnetting(
-
-)engine =InnoDB;
-
-
-
 
 
 create table if not exists CIDRTable(

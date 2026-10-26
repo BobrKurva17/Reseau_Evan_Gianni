@@ -1,11 +1,11 @@
-import tool
+from . import tool
 import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QDialog, QVBoxLayout, QHBoxLayout
 from PyQt6.QtWidgets import QTableWidget, QTableWidgetItem, QAbstractItemView, QComboBox, QHeaderView
-import menuWindow as menuWindow
-import Communication_MachineWindow
-import Decoupe_SRWindow
+from . import menuWindow
+from . import Communication_MachineWindow
+from . import Decoupe_SRWindow
 
 
 class Historique_ActionWindow(QDialog):
@@ -100,14 +100,14 @@ class Historique_ActionWindow(QDialog):
 
     def remplir_table(self):
         if self.liste_historique.currentText() == "communication entre machines":
-            requete = ("SELECT id, id_user, ip_device_1, ip_device_2, mask_device_1, mask_device_2 "
+            requete = ("SELECT id, id_user,username, ip_device_1, ip_device_2, mask_device_1, mask_device_2 "
                        "FROM communication_btw_devices ORDER BY id DESC")
-            entetes = ["N°", "ID utilisateur", "IP machine 1", "IP machine 2",
+            entetes = ["N°", "ID utilisateur","Nom utilisateur", "IP machine 1", "IP machine 2",
                        "Masque machine 1", "Masque machine 2"]
         else:
-            requete = ("SELECT id, id_user, subnet, subnet_mask_classless, number_of_subnets "
+            requete = ("SELECT id, id_user,username, subnet, subnet_mask_classless, number_of_subnets "
                        "FROM subnet_division ORDER BY id DESC")
-            entetes = ["N°", "ID utilisateur", "Réseau", "Masque (CIDR)", "Nombre de sous-réseaux"]
+            entetes = ["N°", "ID utilisateur","Nom utilisateur", "Réseau", "Masque (CIDR)", "Nombre de sous-réseaux"]
 
         objet_connexion = tool.obtenir_connexion(self)
         curseur = objet_connexion.cursor()

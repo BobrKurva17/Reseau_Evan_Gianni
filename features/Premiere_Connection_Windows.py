@@ -1,7 +1,7 @@
 
 import sys
-from pwd import verifierMotDePasse, genererCodeSecret, hash_password
-from tool import obtenir_connexion
+from . import pwd
+from .tool import obtenir_connexion
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QDialog, QVBoxLayout, QFrame,QHBoxLayout,QFormLayout,QLineEdit,QMessageBox
 
@@ -20,7 +20,7 @@ class Premiere_Connection_Windows(QDialog):
             self.label_erreur.setText("Les mots de passe ne correspondent pas")
             return False
 
-        if(not verifierMotDePasse(mdp, self)):
+        if(not pwd.verifierMotDePasse(mdp, self)):
             return False
 
         self.enregistrement_super_admin()
@@ -28,13 +28,13 @@ class Premiere_Connection_Windows(QDialog):
     def enregistrement_super_admin(self):
         cnx = obtenir_connexion(self)
         cursor = cnx.cursor()
-        codeSecret = genererCodeSecret()
+        codeSecret = pwd.genererCodeSecret()
         QMessageBox.warning(self, "Code secret généré", f"Le code secret généré est : {codeSecret}\nVeuillez le noter quelque part, il sera nécessaire pour la récupération du mot de passe.")
         superAdmin = {
             "username": self.input_username.text(),
-            "pswd": hash_password(self.input_mdp.text()),
+            "pswd": pwd.hash_password(self.input_mdp.text()),
             "roles": "superadmin",
-            "codeSecret": hash_password(codeSecret)
+            "codeSecret": pwd.hash_password(codeSecret)
         }
         cursor.execute("INSERT INTO user (username, pswd, roles, codeSecret) VALUES (%s, %s, %s, %s)", 
                                 (superAdmin["username"], superAdmin["pswd"], superAdmin["roles"], superAdmin["codeSecret"]))  

@@ -1,9 +1,10 @@
-import tool
+from . import tool
 import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QLineEdit, QWidget, QLabel, QPushButton, QDialog, QVBoxLayout,QHBoxLayout
 from PyQt6.QtWidgets import QTableWidget,QTableWidgetItem,QAbstractItemView
-import menuWindow as menuWindow 
+from . import menuWindow
+from . import session
 
 class Decoupe_SRWindow(QDialog):
     def __init__(self, parent=None):
@@ -177,6 +178,7 @@ class Decoupe_SRWindow(QDialog):
             self.message_erreur.setText("Le nombre de sous-réseaux doit être supérieur ou égal à 2 !")
             return
 
+        self.determinerDecoupe()
         matrice_sr, matrice_sr_broadcast, matrice_sr_premiere_ip, matrice_sr_derniere_ip, pas, nbr_sr = tool.decoupe_reseau_par_nombre_sr(
             self,
             self.champ_reseau.text(),
@@ -226,6 +228,27 @@ class Decoupe_SRWindow(QDialog):
         self.tableDecoupe_SR.resizeColumnsToContents()
         self.tableDecoupe_SR.resizeRowsToContents()
 
+
+
+    def determinerDecoupe(self):
+        
+           
+    
+            cnx = tool.obtenir_connexion(self)
+            curseur = cnx.cursor()
+            curseur.execute("SELECT * FROM USER WHERE id = %s", (session.user_actuel,))
+            iduser = curseur.fetchone()
+           
+            
+            curseur.execute(
+                 "INSERT INTO subnet_division(id_user,username,subnet , subnet_mask_classless, number_of_subnets) VALUES (%s,%s,%s, %s, %s)",
+                 (session.utilisateur_actuel(),iduser[1],self.champ_reseau.text(), self.champ_masqueCLess.text(), self.champ_nb_sousreseau.text())
+             )
+            curseur.close()
+            cnx.commit()
+            
+    
+    
     def appel_menuWindow(self):
         #instanciation de la fenêtre menu options 
                 if self.menuWindow is None :

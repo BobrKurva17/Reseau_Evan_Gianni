@@ -1,9 +1,9 @@
-import tool 
+from . import tool
 import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QDialog, QVBoxLayout,QHBoxLayout,QWidget
 from PyQt6.QtWidgets import  QLineEdit
-import menuWindow as menuWindow
+from . import menuWindow
 
 class Reseau_SousReseau_Window(QDialog):
     def __init__(self, parent=None):
@@ -15,12 +15,16 @@ class Reseau_SousReseau_Window(QDialog):
             # 1. Layout principal de la fenêtre
             layout_principal = QVBoxLayout(self)
 
-            layout_haut=QHBoxLayout()
+            layout_haut=QVBoxLayout()
             layout_haut.setContentsMargins(150, 100, 150, 200)
             # 2. Widget conteneur pour la saisie de l'IP
             Widget_input = QWidget()
             Widget_input.setObjectName("conteneur_action")
 
+            label_titre=QLabel("Déterminer le réseau")
+            label_titre.setObjectName("label_titre")
+            label_titre.setFixedSize(300,50)
+            label_titre.setAlignment(Qt.AlignmentFlag.AlignCenter)
             # 3. Layout du widget de saisie
             layout_conteneur_input = QVBoxLayout(Widget_input)
             
@@ -84,6 +88,7 @@ class Reseau_SousReseau_Window(QDialog):
             layout_bas.addWidget(bouton_valider,alignment=Qt.AlignmentFlag.AlignRight)
 
             # 6. Composition finale de la fenêtre
+            layout_haut.addWidget(label_titre,alignment=Qt.AlignmentFlag.AlignCenter)
             layout_haut.addWidget(Widget_input)
            
             

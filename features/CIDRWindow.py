@@ -1,10 +1,10 @@
-import tool
 import sys
+from . import tool
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QDialog, QVBoxLayout, QFrame,QHBoxLayout
 from PyQt6.QtWidgets import QTableWidget,QTableWidgetItem,QAbstractItemView
-import ValidationExcelWindow as ValidationExcelWindow
-import menuWindow as menuWindow 
+from . import ValidationExcelWindow
+from . import menuWindow
 
 class CIDR_Window(QDialog):
     def __init__(self, parent=None):

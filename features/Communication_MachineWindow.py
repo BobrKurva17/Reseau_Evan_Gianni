@@ -11,10 +11,10 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-import menuWindow
-import tool
+from . import menuWindow
+from . import tool
 import getpass
-
+from . import session 
 
 class Communication_MachineWindow(QDialog):
     def __init__(self, parent=None):
@@ -27,7 +27,7 @@ class Communication_MachineWindow(QDialog):
         # 1. Layout principal de la fenêtre
         layout_principal = QVBoxLayout(self)
 
-        layout_haut = QHBoxLayout()
+        layout_haut = QVBoxLayout()
         layout_haut.setContentsMargins(150, 100, 150, 200)
 
         # 2. Widget conteneur pour la saisie des IP
@@ -44,6 +44,11 @@ class Communication_MachineWindow(QDialog):
 
         self.message_valide = QLabel("Résultat de la communication entre les machines :")
         self.message_valide.setObjectName("label_action")
+
+        label_titre=QLabel("Déterminer la communication entre 2 machines")
+        label_titre.setObjectName("label_titre")
+        label_titre.setFixedSize(300,50)
+        label_titre.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.resultat = QLabel("")
         self.resultat.setObjectName("label_action")
@@ -119,6 +124,7 @@ class Communication_MachineWindow(QDialog):
         layout_bas.addWidget(bouton_valider, alignment=Qt.AlignmentFlag.AlignRight)
 
         # 11. Composition finale de la fenêtre
+        layout_haut.addWidget(label_titre,alignment=Qt.AlignmentFlag.AlignCenter)
         layout_haut.addWidget(Widget_input)
         layout_principal.addLayout(layout_haut)
         layout_principal.addLayout(layout_bas)
@@ -153,17 +159,19 @@ class Communication_MachineWindow(QDialog):
     def determinerCommunication(self):
         #si les champs sont valides, on appelle la fonction de comparaison des réseaux
         self.demandeValidation_IP()
-        
+
+        cnx = tool.obtenir_connexion(self)
+        curseur = cnx.cursor()
+        curseur.execute("SELECT * FROM USER WHERE id = %s", (session.user_actuel,))
+        iduser = curseur.fetchone()
        
-        # cursor = self.Obj_CONN.cursor()
-       
-        # cursor.execute(
-        #     "INSERT INTO communication_btw_devices (ip_device_1, ip_device_2, mask_device_1, mask_device_2) VALUES (%s, %s, %s, %s)",
-        #     (self.champ_ip_M1.text(), self.champ_ip_M2.text(), self.champ_masque_classfull_M1.text(), self.champ_masque_classfull_M2.text())
-        # )
         
-        # self.Obj_CONN.commit()
-        # cursor.close()
+        curseur.execute(
+             "INSERT INTO communication_btw_devices (id_user,username,ip_device_1, ip_device_2, mask_device_1, mask_device_2) VALUES (%s,%s,%s, %s, %s, %s)",
+             (session.utilisateur_actuel(),iduser[1],self.champ_ip_M1.text(), self.champ_ip_M2.text(), self.champ_masque_classfull_M1.text(), self.champ_masque_classfull_M2.text())
+         )
+        curseur.close()
+        cnx.commit()
         
 
 

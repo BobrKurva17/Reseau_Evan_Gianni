@@ -1,10 +1,10 @@
-import tool
-import pwd
+from . import tool
+from . import pwd
 import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QDialog, QVBoxLayout,QHBoxLayout,QWidget,QTableWidget,QHeaderView,QTableWidgetItem,QRadioButton
 from PyQt6.QtWidgets import  QLineEdit,QMessageBox
-
+from . import menuWindow
 class Menu_Admin_Window(QDialog):
 
     def ajouter_utilisateur(self):
@@ -171,7 +171,7 @@ class Menu_Admin_Window(QDialog):
 
         #bouton de retour
         btn_retour = QPushButton("Retour")
-        btn_retour.clicked.connect(self.close)
+        btn_retour.clicked.connect(self.appel_menuWindow)
 
         layout_haut.addWidget(self.tableUser)
         
@@ -179,7 +179,15 @@ class Menu_Admin_Window(QDialog):
         layout_principal.addWidget(btn_user_desactives)
         layout_principal.addWidget(btn_ajouter_user)
         layout_principal.addWidget(btn_retour)
-
+    def appel_menuWindow(self):
+    #instanciation des autres fenêtres possibles 
+        if self.menuW is None :
+            self.menuW=menuWindow.Menu_Window()
+            self.menuW.show() 
+            self.close()
+        else: 
+            self.menuW.close()
+            self.menuW = None
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     with open("features/style.qss", "r") as fichier:

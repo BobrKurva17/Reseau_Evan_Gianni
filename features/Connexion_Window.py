@@ -1,14 +1,16 @@
 import sys
-from pwd import verify_password,verifierMotDePasse
-from tool import obtenir_connexion
+from . import pwd
+from .tool import obtenir_connexion
+from . import session
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QDialog, QVBoxLayout, QFrame,QHBoxLayout,QFormLayout,QLineEdit,QMessageBox,QInputDialog
-
-class Premiere_Connection_Windows(QDialog):
+from . import menuWindow
+class Connection_Windows(QDialog):
 
     nbErreurs = 0  # Compteur d'erreurs de connexion
-
+    menuW= None
     def connexion(self):
+        session.user_actuel=None
         self.label_erreur.setText("")  # Réinitialiser le message d'erreur
         mdp = self.input_mdp.text()
         utilisateur = self.input_username.text()
@@ -17,7 +19,7 @@ class Premiere_Connection_Windows(QDialog):
             self.label_erreur.setText("Le nom d'utilisateur ne peut pas être vide")
             return False
 
-        if(not verifierMotDePasse(mdp, self)):
+        if(not pwd.verifierMotDePasse(mdp, self)):
             return False
 
         cnx = obtenir_connexion(self)
@@ -34,14 +36,14 @@ class Premiere_Connection_Windows(QDialog):
                     self.close()
                     return False
         
-        if not verify_password(mdp, result[3]):
+        if not pwd.verify_password(mdp, result[3]):
             self.label_erreur.setText("Mot de passe incorrect")
             self.nbErreurs += 1
             if self.nbErreurs == 3:
                 self.nbErreurs = 0  # Réinitialiser le compteur d'erreurs
                 while self.nbErreurs < 3:
                     code, ok = QInputDialog.getText(self, "Code secret", "Entrez le code secret pour réinitialiser le mot de passe :")
-                    if not verify_password(code, result[5]):
+                    if not pwd.verify_password(code, result[5]):
                         QMessageBox.critical(self, "Erreur", "Code secret incorrect. Veuillez réessayer.")
                         self.nbErreurs += 1
                     else:
@@ -54,9 +56,10 @@ class Premiere_Connection_Windows(QDialog):
                     cnx.commit()
                     self.close()  # Fermer la fenêtre de connexion
             return False
-
+        session.user_actuel=result[0]
+        self.appel_menuWindow()
         self.close()  # Fermer la fenêtre de connexion si tout est correct
-        return result[0]
+        
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -96,6 +99,15 @@ class Premiere_Connection_Windows(QDialog):
         layout_principal.addWidget(btn_valider)
 
 
+    def appel_menuWindow(self):
+            #instanciation des autres fenêtres possibles 
+                    if self.menuW is None :
+                        self.menuW=menuWindow.Menu_Window()
+                        self.menuW.show() 
+                        
+                    else: 
+                        self.menuW.close()
+                        self.menuW = None
 
 
 if __name__ == '__main__':
@@ -103,6 +115,6 @@ if __name__ == '__main__':
     with open("features/style.qss", "r") as fichier:
         app.setStyleSheet(fichier.read())
 
-    fenetre = Premiere_Connection_Windows()
+    fenetre = Connection_Windows()
     fenetre.show()
     sys.exit(app.exec())
