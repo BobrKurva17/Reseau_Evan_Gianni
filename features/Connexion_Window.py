@@ -36,7 +36,7 @@ class Connection_Windows(QDialog):
                     self.close()
                     return False
         
-        if not verify_password(mdp, result[3]):
+        if not pwd.verify_password(mdp, result[3]):
             self.label_erreur.setText("Mot de passe incorrect")
             self.nbErreurs += 1
             if self.nbErreurs == 3:

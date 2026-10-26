@@ -1,5 +1,5 @@
 import random
-import tool
+from . import tool
 import string
 import bcrypt as bc
 import json
