@@ -1,9 +1,10 @@
-import tool
-import pwd
+from . import tool
+from . import pwd
 import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QDialog, QVBoxLayout,QHBoxLayout,QWidget,QTableWidget,QHeaderView,QTableWidgetItem,QRadioButton
 from PyQt6.QtWidgets import  QLineEdit,QMessageBox
+from . import Menu_Admin_Window
 
 class Liste_Utilisateur_Bloques_Windows(QDialog):
 
@@ -39,33 +40,43 @@ class Liste_Utilisateur_Bloques_Windows(QDialog):
                 return
                         
     def __init__(self, parent=None):
-            super().__init__(parent)
-            self.setGeometry(250, 100, 1000, 750)
-            self.setWindowTitle("IPPY")
+        super().__init__(parent)
+        self.setGeometry(250, 100, 1000, 750)
+        self.setWindowTitle("IPPY")
+        self.menuW = None
+        # 1. Layout principal de la fenêtre
+        layout_principal = QVBoxLayout(self)
+
+        layout_haut=QHBoxLayout()
+        layout_haut.setContentsMargins(150, 100, 150, 200)
+
+        #affichage des utilisateurs
+        self.tableUser = QTableWidget(0, 4)  # 0 lignes, 3 colonnes
+        self.tableUser.setHorizontalHeaderLabels(["Id","Nom d'utilisateur", "Rôle", "Rétablir l'utilisateur"])
+        self.tableUser.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch) # permet la redimension automatique des colonnes pour remplir l'espace disponible
+        self.tableUser.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+
+        #chargement des utilisateurs
+        self.charger_utilisateurs()
+
+        #bouton de retour
+        btn_retour = QPushButton("Retour")
+        btn_retour.clicked.connect(self.appel_menuAdmin_window)
+
+        layout_haut.addWidget(self.tableUser)
+        
+        layout_principal.addLayout(layout_haut)
+        layout_principal.addWidget(btn_retour)
+
+    def appel_menuAdmin_window(self):
+        if self.menuW is None :
+            self.menuW=Menu_Admin_Window.Menu_Admin_Window()
+            self.menuW.show() 
+            self.close()
+        else: 
+            self.menuW.close()
             self.menuW = None
-            # 1. Layout principal de la fenêtre
-            layout_principal = QVBoxLayout(self)
 
-            layout_haut=QHBoxLayout()
-            layout_haut.setContentsMargins(150, 100, 150, 200)
-
-            #affichage des utilisateurs
-            self.tableUser = QTableWidget(0, 4)  # 0 lignes, 3 colonnes
-            self.tableUser.setHorizontalHeaderLabels(["Id","Nom d'utilisateur", "Rôle", "Rétablir l'utilisateur"])
-            self.tableUser.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch) # permet la redimension automatique des colonnes pour remplir l'espace disponible
-            self.tableUser.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
-
-            #chargement des utilisateurs
-            self.charger_utilisateurs()
-
-            #bouton de retour
-            btn_retour = QPushButton("Retour")
-            btn_retour.clicked.connect(self.close)
-
-            layout_haut.addWidget(self.tableUser)
-            
-            layout_principal.addLayout(layout_haut)
-            layout_principal.addWidget(btn_retour)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

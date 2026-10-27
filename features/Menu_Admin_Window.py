@@ -4,6 +4,7 @@ import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QDialog, QVBoxLayout,QHBoxLayout,QWidget,QTableWidget,QHeaderView,QTableWidgetItem,QRadioButton
 from PyQt6.QtWidgets import  QLineEdit,QMessageBox
+from . import Liste_Utilisateur_Bloques_Windows
 from . import menuWindow
 class Menu_Admin_Window(QDialog):
 
@@ -164,6 +165,7 @@ class Menu_Admin_Window(QDialog):
 
         #bouton accès aux utilisateur désactivés
         btn_user_desactives = QPushButton("Accéder aux utilisateurs désactivés")
+        btn_user_desactives.clicked.connect(self.appel_liste_bloque)
 
         #bouton d'ajout d'utilisateur
         btn_ajouter_user = QPushButton("Ajouter un utilisateur")
@@ -179,6 +181,7 @@ class Menu_Admin_Window(QDialog):
         layout_principal.addWidget(btn_user_desactives)
         layout_principal.addWidget(btn_ajouter_user)
         layout_principal.addWidget(btn_retour)
+        
     def appel_menuWindow(self):
     #instanciation des autres fenêtres possibles 
         if self.menuW is None :
@@ -188,6 +191,16 @@ class Menu_Admin_Window(QDialog):
         else: 
             self.menuW.close()
             self.menuW = None
+
+    def appel_liste_bloque(self):
+        if self.menuW is None :
+            self.menuW=Liste_Utilisateur_Bloques_Windows.Liste_Utilisateur_Bloques_Windows()
+            self.menuW.show() 
+            self.close()
+        else: 
+            self.menuW.close()
+            self.menuW = None
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     with open("features/style.qss", "r") as fichier:

@@ -1,14 +1,69 @@
 import sys
 from . import pwd
-from .tool import obtenir_connexion
+from . import tool
 from . import session
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QDialog, QVBoxLayout, QFrame,QHBoxLayout,QFormLayout,QLineEdit,QMessageBox,QInputDialog
 from . import menuWindow
+from . import Menu_User_Window
+
 class Connection_Windows(QDialog):
 
     nbErreurs = 0  # Compteur d'erreurs de connexion
     menuW= None
+
+    def changer_mot_de_passe_window(self):
+        # Créer une nouvelle fenêtre pour ajouter un utilisateur
+        self.dialog_mdp = QDialog(self)
+        self.dialog_mdp.setWindowTitle("Ajouter un utilisateur")
+        self.dialog_mdp.setGeometry(300, 200, 400, 300)
+        
+        layout = QVBoxLayout(self.dialog_mdp)
+        # Champ pour le mot de passe
+        self.input_password = QLineEdit()
+        self.input_password.setPlaceholderText("Minimum 8 caractères dont 1 chiffre, 1 majuscule et 1 caractère spécial (!@#$%&*?)")
+        self.input_password.setEchoMode(QLineEdit.EchoMode.Password)
+        layout.addWidget(self.input_password)
+
+        # Champ pour la confirmation du mot de passe
+        self.input_password_confirm = QLineEdit()
+        self.input_password_confirm.setPlaceholderText("Retapez votre mot de passe")
+        self.input_password_confirm.setEchoMode(QLineEdit.EchoMode.Password)
+        layout.addWidget(self.input_password_confirm)
+
+        # Bouton pour valider la modification
+        btn_valider = QPushButton("Modifier")
+        btn_valider.clicked.connect(self.enregistrer_nouveau_mdp)
+        layout.addWidget(btn_valider)
+
+        # Label pour les messages d'erreur
+        self.label_erreur = QLabel()
+        self.label_erreur.setStyleSheet("color: red;")
+        layout.addWidget(self.label_erreur)
+
+        self.dialog_mdp.exec()
+
+    def enregistrer_nouveau_mdp(self):
+        self.label_erreur.setText("")  # Réinitialiser le message d'erreur
+
+        nom = self.input_username.text()
+        mdp = self.input_password.text()
+        mdpConfirm = self.input_password_confirm.text()
+
+        if(mdp != mdpConfirm):
+            self.label_erreur.setText("Les mots de passe ne correspondent pas")
+            return False
+
+        if(not pwd.verifierMotDePasse(mdp, self)):
+            return False
+
+        cnx = tool.obtenir_connexion(self)
+        cursor = cnx.cursor()
+        cursor.execute("UPDATE user SET pswd = %s WHERE username = %s", (pwd.hash_password(mdp),nom))
+        cnx.commit()
+        QMessageBox.warning(self, "Confirmation", "Mot de passe changé")
+        self.dialog_mdp.close()
+        
     def connexion(self):
         session.user_actuel=None
         self.label_erreur.setText("")  # Réinitialiser le message d'erreur
@@ -22,7 +77,7 @@ class Connection_Windows(QDialog):
         if(not pwd.verifierMotDePasse(mdp, self)):
             return False
 
-        cnx = obtenir_connexion(self)
+        cnx = tool.obtenir_connexion(self)
         cursor = cnx.cursor()
         cursor.execute("SELECT * FROM user WHERE username = %s", (utilisateur,))
         result = cursor.fetchone()
@@ -48,7 +103,7 @@ class Connection_Windows(QDialog):
                         self.nbErreurs += 1
                     else:
                         QMessageBox.information(self, "Réinitialisation du mot de passe", "Code secret correct. Vous pouvez maintenant réinitialiser votre mot de passe.")
-                        # Ici, vous pouvez ajouter la logique pour permettre à l'utilisateur de réinitialiser son mot de passe.
+                        self.changer_mot_de_passe_window()
                         break
                 if self.nbErreurs == 3:
                     QMessageBox.critical(self, "Erreur", "Nombre maximum de tentatives dépassé. Veuillez contacter l'administrateur.")
