@@ -127,7 +127,7 @@ class Menu_User_Window(QDialog):
         cnx = tool.obtenir_connexion(self)
         cursor = cnx.cursor()
         cursor.execute("UPDATE user SET pswd = %s WHERE id = %s", (p.hash_password(mdp),s.id_user_actuel))
-        cnx.commit
+        cnx.commit()
         QMessageBox.warning(self, "Confirmation", "Mot de passe changé")
         self.dialog_mdp.close()
         
