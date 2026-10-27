@@ -1,9 +1,11 @@
 import os
+import ipaddress
 import pandas as pd
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QTableWidgetItem
 import mysql.connector
 from mysql.connector import errorcode
+
 userInputIP = {}
 historicIP = []
 index = 0
@@ -336,8 +338,6 @@ def calculerReseauClassfull(fenetre,ip,masque):
     fenetre.label_reseau.setText(f"le réseau est :{reseau_classe}")
     fenetre.label_sous_reseau.setText("le sous-réseau : pas de sous-réseau")
 
-   
-        
 
     cidr_saisi = masqueBinaire.count("1")
     
@@ -352,12 +352,8 @@ def calculerReseauClassfull(fenetre,ip,masque):
     else:
         fenetre.label_sous_reseau.setText("le sous-réseau : identique au réseau")
 
-    print("Masque binaire :", masqueBinaire)
-    print("CIDR saisi :", cidr_saisi)
-    print("CIDR classe :", cidr)
-    print("Réseau calculé :", reseau_classe)
-
-
+    return reseau_classe
+# --- MAJ PHASE 2 --- #
 def DecimalVersBinaire(var):
     liste=[]
     # on sépare l'adresse ip en 4 parties correspondantes aux 4 octets
@@ -369,7 +365,7 @@ def DecimalVersBinaire(var):
         Masque.append(octetEnBinaire)
     
     return Masque
-    
+# --- MAJ PHASE 2 --- #    
 def TraducteurBinaire(valeur):
     # la valeur est reçue en String donc conversion en entier 
     valeur_int=int(valeur)
@@ -383,12 +379,15 @@ def TraducteurBinaire(valeur):
         i = i - 1                 # On recule d'une case vers la gauche
     return binaire
 
+# --- MAJ PHASE 2 --- #
 def compareNetwork(fenetre,ip1,masque1,ip2,masque2):
-   
+    
     reseauMachineBinaire=[]        #réseau des 2 machines (binaire)
     masqueMachineBinaire=[]        #masque des 2 machines (binaire)
     machineBinaire=[]              #ip des 2 machines     (binaire)
 
+    #transforme les ip dans le format suivant : 
+    #[[1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1],[0,0,0,0,0,0,0,0]]
     ip1_binaire = DecimalVersBinaire(ip1)
     ip2_binaire = DecimalVersBinaire(ip2)
     masque1_binaire = DecimalVersBinaire(masque1)
@@ -400,11 +399,12 @@ def compareNetwork(fenetre,ip1,masque1,ip2,masque2):
     masqueMachineBinaire.append(masque2_binaire)
 
      # Réseau de chaque machine (son ip & son propre masque)
-    for k in range(2):
+
+    for k in range(2):# comparaison avec les 2 machines 
         reseau=[]
-        for i in range(4):
+        for i in range(4): # comparaison des 4 octets 
             var=""
-            for j in range(8):
+            for j in range(8): # comparaison des 8 bits 
                 if masqueMachineBinaire[k][i][j] == 1 and machineBinaire[k][i][j] == 1:
                     var += "1"
                 else:
@@ -447,98 +447,141 @@ def compareNetwork(fenetre,ip1,masque1,ip2,masque2):
     else : 
         fenetre.resultat.setText("Résultat de la communication entre les machines : les deux machines sont sur des réseau différents !")
 
-#Nouveau découpe réseau sur base du nombre de sous-réseaux demandés 
+# --- MAJ PHASE 2 --- #
 def decoupe_reseau_par_nombre_sr(fenetre,reseau,masque,nbr_sr):
-    #fonction valide mais VALIDATION DU RESEAU A IMPLEMENTER 
     #vérifier la validité du reseau 
     reseau=validIPV2(reseau)
     # vérifier la validité du masque en classless 
     if(masque<8 or masque>30):
         fenetre.message_erreur.setText("Le masque en classless est invalide !")
         return
-    #vérifier la validité du nombre de sr 
+        #vérifier la validité du nombre de sr 
     if(nbr_sr<=0):
         fenetre.message_erreur.setText("le nombre de sous-réseau est invalide !")
-        return 
-    #nombre de bits réservé pour les machines 
-    nbr_bits_hote_min=2
-    # exemple avec /24 alors il me reste 8 bits pour les hôtes 
-    nbr_bits_machines= 32-masque 
-    nbr_bits_empruntes = 0
+        return    
+                    
+    # Convertir l'IP en binaire
+    ip_bits = ""
 
-    
+    for octet in reseau:
+        # Convertir chaque octet en binaire sur 8 bits
+        octet_binaire = format(int(octet), "08b")
+        # Ajouter les 8 bits à la suite des précédents
+        ip_bits += octet_binaire
+
+    # Construire le masque binaire classless
+    masqueBinaire = ""
+
+    for i in range(32):
+        if i < masque:
+            masqueBinaire += "1"
+        else:
+            masqueBinaire += "0"
+    # Calculer l'adresse réseau en appliquant le masque
+    reseau_bits = ""
+
+    for i in range(32):
+        if ip_bits[i] == "1" and masqueBinaire[i] == "1":
+            reseau_bits += "1"
+        else:
+            reseau_bits += "0"
+
+    nbr_bits_hote_min=2             # nombre de bits réservé pour les machines 
+    nbr_bits_machines= 32-masque    # exemple avec /24 alors il me reste 8 bits pour les hôtes 
+
+
+    nbr_bits_empruntes = 0          # incrémenté de 1 à chaque fois que le nombre de sous-réseaux est plus petit 
+                                    # ou égal à 2 exposant(ce nombre de bits empruntés)
     while True:
         if nbr_bits_hote_min > nbr_bits_machines-nbr_bits_empruntes:
             fenetre.message_erreur.setText("il n'y a pas assez de bits hôtes disponible pour ce nombre de SR. ")
-            return [], [], [], [], None, 0 
+            return [], [], [], [], None, 0 # en cas d'erreur il faut retourner toutes les valeurs vides 
                  
         if(nbr_sr <= (2**nbr_bits_empruntes)):
             fenetre.message_valide.setText(f"il y a {2**nbr_bits_empruntes} réseaux et {nbr_bits_empruntes} bits empruntés aux bits hôtes")
-            break
+            break                           #  condition validéé on sort du while 
         nbr_bits_empruntes= nbr_bits_empruntes + 1
-        ##nbr de bits empruntés jusqu'à 
-    nouveau_masque = masque + nbr_bits_empruntes
+    nouveau_masque = masque + nbr_bits_empruntes # 24 + 3 pour 8 SRs ==> 27
 
-    
-    
-    if nouveau_masque <= 16:
-        octet_travaille = 1
-        octet_report = 0
-        nbr_bits_dans_octet = nouveau_masque - 8
-    elif nouveau_masque <= 24:
-        octet_travaille = 2
-        octet_report = 1
-        nbr_bits_dans_octet = nouveau_masque - 16
+    octet_travaille = (nouveau_masque - 1) // 8     # -1 dans le cas de 32 qui donnerait index 4 qui n'existe pas dans les ip
+
+    # Nombre de bits réseau dans le dernier octet concerné
+    nbr_bits_dans_octet = nouveau_masque % 8  # 27 % 8 ==> 3 
+
+    # Calcul du pas
+    if nbr_bits_dans_octet == 0:
+        pas = 1
     else:
-        octet_travaille = 3
-        octet_report = 2
-        nbr_bits_dans_octet = nouveau_masque - 24
+        pas = 2 ** (8 - nbr_bits_dans_octet)    # 2** (8-3) = 32
 
     # conversion du réseau en entier ['192','168','1','0'] en [192,168,1,0]
-    for i in range(len(reseau)):
-        reseau[i] = int(reseau[i])
+    # Séparer les 32 bits en 4 octets
+    reseau_valide = []
+    k = 0           # de 0 à 31 qui permet de parcourir le réseau en binaire 
+    for i in range(4):
+        octet_binaire = ""
+
+        for j in range(8):
+            octet_binaire += reseau_bits[k]
+            k += 1
+
+        reseau_valide.append(int(octet_binaire, 2))
+
 
     matrice_sr = []             #adresse du SR
     matrice_sr_broadcast=[]     #adresse du broadcast 
     matrice_sr_premiere_ip=[]   #adresse de la première ip dans le SR
     matrice_sr_derniere_ip=[]   #adresse de la dernière ip dans le SR
 
-    pas = 2**(8 - nbr_bits_dans_octet)  #calcul du pas 
-   
-    for i in range(2**nbr_bits_empruntes):
-
-        matrice_sr.append( reseau.copy())# le .copy me permet de garder une référence unique de chaque réseau 
-        matrice_sr_broadcast.append(reseau.copy())
-        # on récupère la valeur du dernier qu'on a ajouté dans la liste matrice_sr_broadcast 
-        #le broadcast est égal à l'ip du réseau suivant -1 
-        matrice_sr_broadcast[i][octet_travaille]+=(pas-1)
-
-        matrice_sr_premiere_ip.append(reseau.copy())
-        matrice_sr_premiere_ip[i][octet_travaille]+=1
-
-        matrice_sr_derniere_ip.append(reseau.copy())
-        matrice_sr_derniere_ip[i][octet_travaille]+=(pas-2)
-        
-        if reseau[octet_travaille] + pas <= 255:
-            reseau[octet_travaille] += pas
-        else:
-            if (reseau[octet_report] + 1 )<=255:
-                reseau[octet_travaille] = 0
-                reseau[octet_report] += 1
-            elif(reseau[octet_report-1] +1)<=255:
-                reseau[octet_travaille]=0 
-                reseau[octet_report]=0
-                reseau[octet_report-1]+=1
-            else: 
-                reseau[octet_travaille]=0
-                reseau[octet_report]=0
-                reseau[octet_report-1]=0
-                reseau[octet_report-2]+=1
-
-        
     #si l'utilisateur demande 7 sous-reseau alors il en obtiendra réellement 8 
     #car 7 <= 2**3 donc 7 <= 8
     srTot = 2**nbr_bits_empruntes
+   
+    srTot = 2 ** nbr_bits_empruntes
+
+    for i in range(srTot):
+
+        # 1. Adresse du réseau
+        matrice_sr.append(reseau_valide.copy())
+
+        # 2. Adresse de broadcast
+        matrice_sr_broadcast.append(reseau_valide.copy())
+
+        # On complète l'octet travaillé
+        matrice_sr_broadcast[i][octet_travaille] += pas - 1
+
+        # Tous les octets suivants deviennent 255
+        for j in range(octet_travaille + 1, 4):
+            matrice_sr_broadcast[i][j] = 255
+
+        # 3. Première adresse IP utilisable
+        matrice_sr_premiere_ip.append(reseau_valide.copy())
+        matrice_sr_premiere_ip[i][3] += 1
+
+        # 4. Dernière adresse IP utilisable
+        matrice_sr_derniere_ip.append(matrice_sr_broadcast[i].copy())
+        matrice_sr_derniere_ip[i][3] -= 1
+
+        # 5. Préparer le réseau suivant, sauf après le dernier
+        if i < srTot - 1:
+
+            # Ajouter le pas à l'octet travaillé
+            reseau_valide[octet_travaille] += pas
+
+            # Gérer automatiquement les reports entre les octets
+            for j in range(octet_travaille, -1, -1):
+
+                if reseau_valide[j] > 255:
+
+                    reseau_valide[j] = 0
+
+                    # Reporter 1 sur l'octet précédent, s'il existe
+                    if j > 0:
+                        reseau_valide[j - 1] += 1
+
+                else:
+                    break
+        
     
     return matrice_sr, matrice_sr_broadcast,matrice_sr_premiere_ip, matrice_sr_derniere_ip, pas,srTot
 
@@ -587,9 +630,7 @@ def validIPV2(ip):
 
         print("IP incorrecte.")
         return 
-
-
-
+    
 def cleanScreen():
     # 'nt' = Windows, 'posix' = Linux/macOS
     if os.name == 'nt':

@@ -91,18 +91,18 @@ class Historique_ActionWindow(QDialog):
             #ip1 = 2 , ip2 = 3 
             self.CMW= Communication_MachineWindow.Communication_MachineWindow()
             self.CMW.show()
-            self.CMW.champ_ip_M1.setText(valeurs[2])
-            self.CMW.champ_ip_M2.setText(valeurs[3])
-            self.CMW.champ_masque_classfull_M1.setText(valeurs[4])
-            self.CMW.champ_masque_classfull_M2.setText(valeurs[5])
+            self.CMW.champ_ip_M1.setText(valeurs[3])
+            self.CMW.champ_ip_M2.setText(valeurs[4])
+            self.CMW.champ_masque_classfull_M1.setText(valeurs[5])
+            self.CMW.champ_masque_classfull_M2.setText(valeurs[6])
             self.close()
         # idem pour la fenêtre découpe en sous réseaux 
         else : 
             self.D_SRW = Decoupe_SRWindow.Decoupe_SRWindow()
             self.D_SRW.show()
-            self.D_SRW.champ_reseau.setText(valeurs[2])
-            self.D_SRW.champ_masqueCLess.setText(valeurs[3])
-            self.D_SRW.champ_nb_sousreseau.setText(valeurs[4])
+            self.D_SRW.champ_reseau.setText(valeurs[3])
+            self.D_SRW.champ_masqueCLess.setText(valeurs[4])
+            self.D_SRW.champ_nb_sousreseau.setText(valeurs[5])
             self.close()
 
     def remplir_table(self):
