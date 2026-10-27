@@ -1,7 +1,10 @@
 ------------------------------------------------------------------------------------
 ce fichier servira à uniformiser les commentaires afin d'améliorer la compréhension
 ------------------------------------------------------------------------------------
-certains commentaires très spécifiques ne seront pas répertoriés 
+certains commentaires très spécifiques ne seront pas répertoriés.
+
+!! Ces commentaires sont humains et ont eté réalisés le 27-10-26 à 11:35 !! 
+
 
         ---EXEMPLE---
 
