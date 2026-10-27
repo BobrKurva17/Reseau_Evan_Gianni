@@ -1,10 +1,11 @@
 from . import tool
 import sys
 from . import session 
+# --- import outils pyside --- # 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QDialog, QVBoxLayout, QFrame,QHBoxLayout
+# --- import fenêtre --- # 
 from . import CIDRWindow
-
 from . import ValidationInput_Window
 from . import ClasseIP_Window
 from . import Reseau_SousReseau_Window
@@ -14,13 +15,14 @@ from . import Masque_ClasseWindow
 from . import Historique_ActionWindow
 from . import Menu_Admin_Window
 from . import Menu_User_Window
+
 class Menu_Window(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setGeometry(250, 100, 1000, 750)
         self.setWindowTitle("Test")
 
-        #initialisation de l'instance de la fenêtre CIDRWindows permet le retour en arriêre 
+       # --- instances des fenêtres appelées = null --- # 
         self.CIDRW = None 
         self.VIW = None 
         self.CLIW = None
@@ -36,24 +38,23 @@ class Menu_Window(QDialog):
         curseur = cnx.cursor()
         curseur.execute("SELECT * FROM USER WHERE id = %s", (session.user_actuel,))
         self.utilisateur_actuel = curseur.fetchone()
-        # marges autour du panneau : laissent voir le fond
+
+        # --- Layout principal de la fenêtre --- #
         layout_principal = QVBoxLayout(self)
         ##layout_principal.setContentsMargins(10, 20, 60, 40)
 
-        # panneau central
+        # --- Frame contenant le bloc d'action utilisateur --- #
         zone_boutons = QFrame()
-        ##zone_boutons.setFixedWidth(600)
         zone_boutons.setObjectName("zone_boutons")
-
-        # marges internes : le label et les boutons ne touchent pas les bords du panneau
+        # --- Layout de la Frame action utilisateur --- #
         self.layout_boutons = QVBoxLayout(zone_boutons)
         self.layout_boutons.setContentsMargins(60, 30, 60, 30)
         self.layout_boutons.setSpacing(10)
-
+        # --- label instruction action --- #
         label_boutons = QLabel("Que souhaitez vous faire aujourd'hui ?")
         label_boutons.setObjectName("label_boutons")
         label_boutons.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
+        # --- composition du layout d'actions --- #
         self.buttonCIDR = QPushButton("Tableau CIDR")
         self.buttonIP_Format_Valide = QPushButton("Vérifier votre IP")
         self.buttonClasse_IP = QPushButton("Déterminer la classe de votre IP")
@@ -70,30 +71,33 @@ class Menu_Window(QDialog):
                        self.buttonMasque_IP, self.buttonReseau_SR, self.buttonMeme_reseau, self.buttonDecoupe_SR, self.buttonHistorique, self.buttonProfil):
             self.layout_boutons.addWidget(bouton)
         self.layout_boutons.addStretch()
+        # détermine si le bouton Menu administrateur doit apparaître 
         self.Acces_Admin()
-        layout_principal.addWidget(zone_boutons, alignment=Qt.AlignmentFlag.AlignCenter)
-        # ligne du bas : bouton retour à gauche
+        
+
+        # --- layout bas (bouton retour, valider) --- #
         layout_bas = QHBoxLayout()
         self.bouton_retour = QPushButton("Retour")
         self.bouton_retour.setObjectName("bouton_retour")
         layout_bas.addWidget(self.bouton_retour)
-        layout_bas.addStretch()          # pousse le bouton vers la gauche
+        layout_bas.addStretch()          
+
+        # --- composition de la fenêtre --- #
+        layout_principal.addWidget(zone_boutons, alignment=Qt.AlignmentFlag.AlignCenter)
         layout_principal.addLayout(layout_bas)
 
-        self.buttonCIDR.clicked.connect(self.appel_CIDRWindow)
-
-        self.buttonIP_Format_Valide.clicked.connect(self.appel_IPWindow)
-
-        self.buttonClasse_IP.clicked.connect(self.appel_ClasseIpWindow)
-        self.buttonReseau_SR.clicked.connect(self.appel_Reseau_SousReseau_Window)
-        self.buttonMeme_reseau.clicked.connect(self.appel_Communication_MachineWindow)
-        self.buttonDecoupe_SR.clicked.connect(self.appel_DecoupeSRWindow)
-        self.buttonMasque_IP.clicked.connect(self.appel_MasqueClasseWindow)
-        self.buttonHistorique.clicked.connect(self.appel_HistoriqueWindow)
-        self.buttonProfil.clicked.connect(self.appel_Menu_User)
+        # --- appel des fonctions et autres fenêtres --- #
+        self.buttonCIDR.clicked.connect(self.appel_CIDRWindow)                          # Tableau CIDR
+        self.buttonIP_Format_Valide.clicked.connect(self.appel_IPWindow)                # Validation format d'une IP
+        self.buttonClasse_IP.clicked.connect(self.appel_ClasseIpWindow)                 # Classe d'une IP 
+        self.buttonReseau_SR.clicked.connect(self.appel_Reseau_SousReseau_Window)       # Reseau et SR d'une IP
+        self.buttonMeme_reseau.clicked.connect(self.appel_Communication_MachineWindow)  # Communication entre machines
+        self.buttonDecoupe_SR.clicked.connect(self.appel_DecoupeSRWindow)               # Decoupe sur base du nbr de SR     
+        self.buttonMasque_IP.clicked.connect(self.appel_MasqueClasseWindow)             # Masque de classe d'une IP 
+        self.buttonHistorique.clicked.connect(self.appel_HistoriqueWindow)              # Historique actions utilisateur 
+        self.buttonProfil.clicked.connect(self.appel_Menu_User)                         # Profil utilisateur 
         
     def Acces_Admin(self):
-        
         #on vérifie si c'est un admin 
         if(self.utilisateur_actuel[2]=="admin" or self.utilisateur_actuel[2]=="superadmin" ):
             
@@ -184,8 +188,7 @@ class Menu_Window(QDialog):
         else:
             self.RES_SRW.close()
             self.RES_SRW = None
-
-
+            
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     with open("features/style.qss", "r") as fichier:
