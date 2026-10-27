@@ -13,13 +13,9 @@ create table if not exists user(
 
 create table if not exists alert(
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nbAlert INT default 0,
-    idUser1 INT,
-    idUser2 INT,
-    dateAlert1 TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    dateAlert2 TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (idUser1) REFERENCES user(id),
-    FOREIGN KEY (idUser2) REFERENCES user(id)
+    idUser INT,
+    dateAlert TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (idUser) REFERENCES user(id)
 )engine=InnoDB;
 
 CREATE TABLE IF NOT EXISTS subnet_division (

@@ -1,6 +1,8 @@
 from . import tool
 from . import pwd
+from . import session
 import sys
+from datetime import date, datetime
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QDialog, QVBoxLayout,QHBoxLayout,QWidget,QTableWidget,QHeaderView,QTableWidgetItem,QRadioButton
 from PyQt6.QtWidgets import  QLineEdit,QMessageBox
@@ -143,6 +145,38 @@ class Menu_Admin_Window(QDialog):
         else:
             return
 
+    def renitialisation_mdp(self):
+        aujourd_hui = date.today()
+        cnx = tool.obtenir_connexion(self)
+        cursor = cnx.cursor()
+
+        #retire les demandes avant aujourd'hui
+        cursor.execute("DELETE FROM alert WHERE DATE(dateAlert) < %s", (aujourd_hui,))
+        cnx.commit()
+
+        #vérification si une demande de l'admin a déjà été faite
+        cursor.execute("SELECT * FROM alert WHERE idUser = %s", (session.user_actuel,))
+        result = cursor.fetchone() 
+        
+        if result is not None:
+            QMessageBox.critical(self, "Déjà demandé", "Votre demande a déjà été enregistrée aujourd'hui, demandez à un autre administrateur de valider.")
+        else:   
+            cursor.execute("INSERT INTO alert (idUser, dateAlert) VALUES (%s, %s)", (session.user_actuel, aujourd_hui))
+            cnx.commit()  
+            QMessageBox.information(self, "Succès", "Votre demande a bien été enregistrée.")
+
+        cursor.execute("SELECT COUNT(*) FROM alert")
+        nb_alert = cursor.fetchone()
+        
+        if nb_alert[0] == 2:
+            mdpDefaut = "@NouveauMdp123"
+            cursor.execute("UPDATE user SET pswd = %s", (pwd.hash_password(mdpDefaut),))
+            # vide la table alert une fois fini
+            cursor.execute("DELETE FROM alert")
+            cnx.commit()
+            QMessageBox.information(self, "Succès", "Tous les mots de passe ont été réinitialisés. Veuillez avertir les utilisateurs de changer leur mot de passe une fois connectés.")
+
+        return
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setGeometry(250, 100, 1000, 750)
@@ -171,6 +205,9 @@ class Menu_Admin_Window(QDialog):
         btn_ajouter_user = QPushButton("Ajouter un utilisateur")
         btn_ajouter_user.clicked.connect(self.ajouter_utilisateur)
 
+        #bouton pour tout reset
+        btn_renitialiser = QPushButton("Rénitialiser mdp")
+        btn_renitialiser.clicked.connect(self.renitialisation_mdp)
         #bouton de retour
         btn_retour = QPushButton("Retour")
         btn_retour.clicked.connect(self.appel_menuWindow)
@@ -180,6 +217,7 @@ class Menu_Admin_Window(QDialog):
         layout_principal.addLayout(layout_haut)
         layout_principal.addWidget(btn_user_desactives)
         layout_principal.addWidget(btn_ajouter_user)
+        layout_principal.addWidget(btn_renitialiser)
         layout_principal.addWidget(btn_retour)
         
     def appel_menuWindow(self):
