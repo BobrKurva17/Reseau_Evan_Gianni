@@ -3,11 +3,13 @@ from features.pwd import login, firstLaunch
 import mysql.connector
 from mysql.connector import errorcode
 import sys
+# --- import outils pyside --- # 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication
+# --- import fenêtre --- # 
 from features.Premiere_Connection_Windows import Premiere_Connection_Windows
 from features.Connexion_Window import Connection_Windows
-##from features import session as sess
+
 
 # Configuration de la base de données
 config = {
@@ -30,34 +32,23 @@ except mysql.connector.Error as err:
         print(err)
     exit()
 
-print("""
- █████ ███████████  ███████████  █████ █████E
-░░███ ░░███░░░░░███░░███░░░░░███░░███ ░░███ 
- ░███  ░███    ░███ ░███    ░███ ░░███ ███  
- ░███  ░██████████  ░██████████   ░░█████   
- ░███  ░███░░░░░░   ░███░░░░░░     ░░███    
- ░███  ░███         ░███            ░███    
- █████ █████        █████           █████   
-░░░░░ ░░░░░        ░░░░░           ░░░░░     
-──────────────────────────────────────────────────────────────                                     
-""")
-
- #firstLaunch(cnx)
-
+#firstLaunch(cnx)
 ##user = login(cnx)
+##home(user,cnx)
 
-
+# --- MAJ PHASE 2 --- #
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-
+    # --- ouverture et manipulation CSS --- #
     with open("features/style.qss", "r", encoding="utf-8") as fichier:
         app.setStyleSheet(fichier.read())
-
+    # --- manipulation dans la base de données --- #
     cursor = cnx.cursor()
     cursor.execute("SELECT COUNT(*) FROM user")
     (count,) = cursor.fetchone()
     cursor.close()
 
+    # accès à la fenêtre Premiere_Connection_Windows si pas de super admin
     if count == 0 : 
         fenetre = Premiere_Connection_Windows()
     else :
@@ -65,4 +56,3 @@ if __name__ == '__main__':
     
     fenetre.show()
     sys.exit(app.exec())
-##home(user,cnx)
